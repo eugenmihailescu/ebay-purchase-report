@@ -8,25 +8,25 @@
  * @param {bool=}
  *            reverseorder - Specify true if the sorting must be in reverse order, false otherwise. Default to false.
  */
-(function($, format, sortby, reverseorder) {
+(function(format, sortby, reverseorder) {
   format = format || 'plain';
   sortby = sortby || '';
   reverseorder = reverseorder || false;
 
   /**
-     * Prints-out a group subtotal
-     * 
-     * @param {string}
-     *            label - The group's total prefix label
-     * @param {number}
-     *            value - The group's total value
-     * @param {string}
-     *            currency - The group's currency for the value
-     * @param {int}
-     *            count - The group's total number of items
-     * @param {int}
-     *            shipped - The group's total number of shipped items
-     */
+   * Prints-out a group subtotal
+   * 
+   * @param {string}
+   *            label - The group's total prefix label
+   * @param {number}
+   *            value - The group's total value
+   * @param {string}
+   *            currency - The group's currency for the value
+   * @param {int}
+   *            count - The group's total number of items
+   * @param {int}
+   *            shipped - The group's total number of shipped items
+   */
   function printGrpFooter(label, value, currency, count, shipped) {
     console.log(sep);
     console.log(' ' + label + ': ' + Math.round(value, 2) + ' ' + currency + ', ' + shipped + ' shipped, ' + (count - shipped) + ' not-shipped (' + count + ' items, ~ ' + Math.round(value / count, 2) + ' ' + currency + '/item)');
@@ -34,28 +34,28 @@
   }
 
   /**
-     * Returns a string padded with space if not reaching a given minimum length
-     * 
-     * @param {string}
-     *            str - The string to pad
-     * @param {int}
-     *            minlen - The desired minimum length. If the string length is less than this value then the remaining length
-     *            will be padded with spaced
-     * @return {string} - Returns the padded string
-     */
+   * Returns a string padded with space if not reaching a given minimum length
+   * 
+   * @param {string}
+   *            str - The string to pad
+   * @param {int}
+   *            minlen - The desired minimum length. If the string length is less than this value then the remaining length
+   *            will be padded with spaced
+   * @return {string} - Returns the padded string
+   */
   function strpad(str, minlen) {
     var i = minlen - str.length;
     return str + (i > 0 ? ' '.repeat(i) : '');
   }
 
   /**
-     * Prints-out a row for the given fields by padding their values with spaces if not having a given minimum length.
-     * 
-     * @param {Object}
-     *            fields - An object containing the field's key name and their corresponding values
-     * @param {Object}
-     *            minlen - An object containing the field's key name and their corresponding minimum length
-     */
+   * Prints-out a row for the given fields by padding their values with spaces if not having a given minimum length.
+   * 
+   * @param {Object}
+   *            fields - An object containing the field's key name and their corresponding values
+   * @param {Object}
+   *            minlen - An object containing the field's key name and their corresponding minimum length
+   */
   function printRow(fields, minlen) {
     var f,
       a = [],
@@ -66,6 +66,34 @@
       }
     }
     console.log('| ' + a.join(' | '));
+  }
+
+  /**
+   * Get the inner text of a HTML element
+   * 
+   * @param {Object}
+   *            element - The DOM element
+   * @param {String}
+   *            value - The default value if element is NULL
+   * @return {String}
+   */
+  function getInnerText(element, value) {
+    return null !== element ? element.innerText : value;
+  }
+
+  /**
+   * Get the attribute value of a HTML element
+   * 
+   * @param {Object}
+   *            element - The DOM element
+   * @param {string}
+   *            name - The attribute name
+   * @param {String}
+   *            value - The default value if element is NULL
+   * @return {String}
+   */
+  function getAttribute(element, name, value) {
+    return null !== element ? element.getAttribute(name) : value;
   }
 
   var sep = '-'.repeat(160);
@@ -101,22 +129,31 @@
   };
 
   // parse the document
-  $('#orders .result-set-r .order-r').each(function(key, value) {
-    var purchaseDate = $(value).find('.order-row .purchase-header .row-date').text();
-    $(value).find('.item-level-wrap').each(function(k, v) {
-      var purchasePrice = $(v).find('.cost-label').text();
-      var itemSpec = $(v).find('.item-spec-r .item-title').text();
-      var deliveryDate = $(v).find('.item-spec-r .delivery-date strong').text();
-      var shipStatus = $(v).find('.purchase-info-col .order-status .ph-ship').prop('title');
-      items.push({
-        purchaseDate: purchaseDate,
-        price: purchasePrice,
-        specs: itemSpec,
-        deliveryDate: deliveryDate,
-        shipStatus: shipStatus.replace(/.*?([\d\/]+)/g, '$1')
-      });
-    });
-  });
+  var orders = document.querySelectorAll('#orders .result-set-r .order-r');
+  var order, item;
+  for (order in orders) {
+    if (orders.hasOwnProperty(order)) {
+      var purchaseDate = getInnerText(orders[order].querySelector('.order-row .purchase-header .row-date'), '');
+      var orderItems = orders[order].querySelectorAll('.item-level-wrap');
+
+      for (item in orderItems) {
+        if (orderItems.hasOwnProperty(item)) {
+          var purchasePrice = getInnerText(orderItems[item].querySelector('.cost-label'), 0);
+          var itemSpec = getInnerText(orderItems[item].querySelector('.item-spec-r .item-title'), '');
+          var deliveryDate = getInnerText(orderItems[item].querySelector('.item-spec-r .delivery-date strong'), '');
+          var shipStatus = getAttribute(orderItems[item].querySelector('.purchase-info-col .order-status .ph-ship'), 'title', '');
+
+          items.push({
+            purchaseDate: purchaseDate,
+            price: purchasePrice,
+            specs: itemSpec,
+            deliveryDate: deliveryDate,
+            shipStatus: shipStatus.replace(/.*?([\d\/]+)/g, '$1')
+          });
+        }
+      }
+    }
+  }
 
   // sort the result
   if (sortby.length && collen.hasOwnProperty(sortby)) {
@@ -180,7 +217,7 @@
     for (i = 0; i < items.length; i += 1) {
       e = items[i];
       c = e.price.replace(/.*?([a-zA-Z]+)/g, '$1');
-      
+
       // print the group footer
       if ((('' == sortby || 'purchaseDate' == sortby || 'shipStatus' == sortby || 'deliveryDate' == sortby) && prevDate.length && e.purchaseDate != prevDate) || (prevCurrency.length && c != prevCurrency)) {
         printGrpFooter('SUBTOTAL', t, currency, j, s);
@@ -191,17 +228,17 @@
         prevDate = e.purchaseDate;
         prevCurrency = c;
       }
-      
+
       if (/\d+/g.test(e.shipStatus)) {
         s += 1;
         ts += 1;
       }
-      
+
       currency = c;
       v = parseFloat(e.price.replace(/.*?([\d\.]+).*/g, '$1'));
       t += v;
       gt += v;
-      
+
       // print the item's row
       printRow({
         index: i + 1,
@@ -211,7 +248,7 @@
         deliveryDate: e.deliveryDate,
         specs: e.specs
       }, collen);
-      
+
       j += 1;
       prevDate = e.purchaseDate;
       prevCurrency = currency;
@@ -219,15 +256,15 @@
         currencies.push(prevCurrency);
       }
     }
-    
+
     // print the last group footer
     if (g) {
       printGrpFooter('SUBTOTAL', t, currency, j, s);
     }
-    
+
     // print the grand total
     if (1 == currencies.length) {
       printGrpFooter('GRAND TOTAL', gt, currencies[0], items.length, ts);
     }
   }
-})(jQuery, 'plain', '', false);
+})('plain', '', false);
