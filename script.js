@@ -110,8 +110,8 @@
   } else {
     console.log(sep);
     printRow({
-      purchaseDate: 'Date',
-      price: 'Price',
+      purchaseDate: 'Purchase Date',
+      price: 'Item Price',
       shipStatus: 'Shipping Status',
       deliveryDate: 'Estimated Delivery Date',
       specs: 'Item description'
