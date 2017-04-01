@@ -113,7 +113,7 @@
       purchaseDate: 'Date',
       price: 'Price',
       shipStatus: 'Shipping Status',
-      deliveryDate: 'Estimated DeliveryDate',
+      deliveryDate: 'Estimated Delivery Date',
       specs: 'Item description'
     }, collen);
     console.log(sep);
