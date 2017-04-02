@@ -125,11 +125,34 @@ function Report(params) {
      *            parent - The parent DOM element where to append the row
      * @param {Object}
      *            fields - An object containing the field's key name and their corresponding values
+     * @param {Object=}
+     *            dataset - Optional. A dataset object to add to the row
      */
-    function addRow(parent, fields) {
+    function addRow(parent, fields, dataset) {
+
+        var onRowClick = function(event) {
+            browser.runtime.sendMessage({
+                showItem : {
+                    orderId : event.target.parentElement.dataset.orderid,
+                    index : event.target.parentElement.dataset.index
+                }
+            });
+        };
+
         var f, a = [], v, attr;
+        dataset = dataset || {};
 
         var row = appendElement(parent, 'tr');
+        for (f in dataset) {
+            if (dataset.hasOwnProperty(f)) {
+                row.dataset[f] = dataset[f];
+            }
+        }
+
+        if (dataset.hasOwnProperty('orderid') && dataset.hasOwnProperty('index')) {
+            row.addEventListener("click", onRowClick);
+        }
+
         for (f in fields) {
             if (fields.hasOwnProperty(f)) {
                 attr = null;
@@ -201,6 +224,9 @@ function Report(params) {
                 shipStatus : e.shipStatus,
                 deliveryDate : e.deliveryDate,
                 specs : e.specs
+            }, {
+                orderid : e.orderId,
+                index : e.itemIndex
             });
 
             j += 1;

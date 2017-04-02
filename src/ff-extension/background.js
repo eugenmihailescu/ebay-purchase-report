@@ -1,3 +1,14 @@
+function getEbayTab(resolve) {
+    var promise = browser.tabs.query({
+        active : false,
+        status : "complete",
+        url : "*://*.ebay.com/*"
+    });
+    if (resolve) {
+        promise.then(resolve);
+    }
+}
+
 browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     var newTabId = null;
 
@@ -28,16 +39,24 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         });
     }
 
-    if (request.hasOwnProperty('sortBy')) {
-        var querying = browser.tabs.query({
-            active : false,
-            status : "complete",
-            url : "*://*.ebay.com/*"
-        });
-
-        querying.then(function(tabs) {
+    // pass the request forward to the content script
+    if (request.hasOwnProperty('sortBy') || request.hasOwnProperty('showItem')) {
+        getEbayTab(function(tabs) {
             tabs.forEach(function(tab, index) {
+                request.tabId = tab.id;
                 browser.tabs.sendMessage(tab.id, request);
+            });
+        });
+    }
+
+    if (request.hasOwnProperty('showEbay')) {
+        getEbayTab(function(tabs) {
+            tabs.forEach(function(tab, index) {
+                var updated = browser.tabs.update(tab.id, {
+                    active : true,
+                    url : request.url
+                });
+                return;
             });
         });
     }

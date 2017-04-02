@@ -1,6 +1,7 @@
 /**
  * Collects the eBay purchase history data from the current page and prints-out a report in the given format.
  */
+
 function EbayReport(params) {
     params = params || {};
 
@@ -45,8 +46,15 @@ function EbayReport(params) {
         if (null !== orders) {
             for (order in orders) {
                 if (orders.hasOwnProperty(order)) {
+                    var orderId = orders[order].querySelector('input.item-select[type=checkbox]');
+                    if (null !== orderId) {
+                        orderId = orderId.dataset.orderid;
+                    }
+
                     var purchaseDate = getInnerText(orders[order].querySelector('.order-row .purchase-header .row-date'), '');
                     var orderItems = orders[order].querySelectorAll('.item-level-wrap');
+
+                    var itemIndex = 1;
 
                     for (item in orderItems) {
                         if (orderItems.hasOwnProperty(item)) {
@@ -58,12 +66,16 @@ function EbayReport(params) {
                                     .querySelector('.purchase-info-col .order-status .ph-ship'), 'title', '');
 
                             data.push({
+                                orderId : orderId,
+                                itemIndex : itemIndex,
                                 purchaseDate : purchaseDate,
                                 price : purchasePrice,
                                 specs : itemSpec,
                                 deliveryDate : deliveryDate,
                                 shipStatus : shipStatus.replace(/.*?([\d\/]+)/g, '$1')
                             });
+
+                            itemIndex += 1;
                         }
                     }
                 }
@@ -137,6 +149,45 @@ function onButtonClick(params) {
     });
 }
 
+function onShowItem(params) {
+    params = params || false;
+
+    if (!params)
+        return;
+
+//    var clickEvent = new MouseEvent("click", {
+//        "view" : window,
+//        "bubbles" : true,
+//        "cancelable" : false
+//    });
+
+    var orders = document.querySelectorAll('#orders .result-set-r .order-r');
+    if (null !== orders) {
+        orders.forEach(function(order, index) {
+            var found = order.querySelector('input[type="checkbox"][data-orderid="' + params.showItem.orderId + '"');
+            if (null !== found) {
+                var orderItems = order.querySelectorAll('.item-level-wrap');
+                var i;
+                if (null !== orderItems) {
+                    orderItems.forEach(function(value, index) {
+                        if (index === params.showItem.index - 1) {
+                            var link = value.querySelector('.item-spec-r .item-title');
+                            if (null !== link) {
+                                // link.dispatchEvent(clickEvent);
+                                browser.runtime.sendMessage({
+                                    showEbay : true,
+                                    url : link.getAttribute("href")
+                                });
+                            }
+                            return;
+                        }
+                    });
+                }
+            }
+        });
+    }
+}
+
 // inject the Report button into the eBay purchase history page
 var parent = document.querySelector('#orders .container-header');
 if (parent) {
@@ -159,5 +210,9 @@ if (parent) {
 browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.hasOwnProperty('sortBy')) {
         onButtonClick(request);
+    }
+
+    if (request.hasOwnProperty('showItem')) {
+        onShowItem(request);
     }
 });
