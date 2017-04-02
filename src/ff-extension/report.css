@@ -30,6 +30,8 @@
 	background-color: #F4AE01 !important;
 	color: #000 !important;
 	text-align: center;
+	padding-left: 0.5em;
+	padding-right: 0.5em;
 }
 
 .report th:LAST-CHILD {

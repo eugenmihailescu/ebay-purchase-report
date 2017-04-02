@@ -65,11 +65,14 @@ function EbayReport(params) {
                             var shipStatus = getAttribute(orderItems[item]
                                     .querySelector('.purchase-info-col .order-status .ph-ship'), 'title', '');
 
+                            var quantity = getInnerText(orderItems[item].querySelector('.qa'), "1");
+
                             data.push({
                                 orderId : orderId,
                                 itemIndex : itemIndex,
                                 purchaseDate : purchaseDate,
                                 price : purchasePrice,
+                                quantity : quantity.replace(/[\D]+/g, ''),
                                 specs : itemSpec,
                                 deliveryDate : deliveryDate,
                                 shipStatus : shipStatus.replace(/.*?([\d\/]+)/g, '$1')
@@ -155,12 +158,6 @@ function onShowItem(params) {
     if (!params)
         return;
 
-//    var clickEvent = new MouseEvent("click", {
-//        "view" : window,
-//        "bubbles" : true,
-//        "cancelable" : false
-//    });
-
     var orders = document.querySelectorAll('#orders .result-set-r .order-r');
     if (null !== orders) {
         orders.forEach(function(order, index) {
@@ -173,9 +170,8 @@ function onShowItem(params) {
                         if (index === params.showItem.index - 1) {
                             var link = value.querySelector('.item-spec-r .item-title');
                             if (null !== link) {
-                                // link.dispatchEvent(clickEvent);
                                 browser.runtime.sendMessage({
-                                    showEbay : true,
+                                    showEbayItem : true,
                                     url : link.getAttribute("href")
                                 });
                             }

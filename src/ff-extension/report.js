@@ -47,6 +47,10 @@ function Report(params) {
                 label : "Item price",
                 sort : true
             },
+            quantity : {
+                label : "Quantity",
+                sort : true
+            },
             shipStatus : {
                 label : "Shipping status",
                 sort : true
@@ -114,7 +118,7 @@ function Report(params) {
         text += ' ' + currency + '/item)';
 
         appendElement(row, 'td', text, {
-            "colspan" : "4"
+            "colspan" : "5"
         });
     }
 
@@ -221,6 +225,7 @@ function Report(params) {
                 index : i + 1,
                 purchaseDate : e.purchaseDate,
                 price : e.price,
+                quantity : e.quantity,
                 shipStatus : e.shipStatus,
                 deliveryDate : e.deliveryDate,
                 specs : e.specs
@@ -252,19 +257,21 @@ function Report(params) {
 }
 
 browser.runtime.onMessage.addListener(function(request, sender, sendRespose) {
-    var reportDate = document.querySelector('.report-date');
-    var table = document.querySelector('.report');
+    if (request.hasOwnProperty('reportData')) {
+        var reportDate = document.querySelector('.report-date');
+        var table = document.querySelector('.report');
 
-    if (null !== reportDate) {
-        var today = new Date();
-        reportDate.appendChild(document.createTextNode(today.toUTCString()));
-    }
+        if (null !== reportDate) {
+            var today = new Date();
+            reportDate.appendChild(document.createTextNode(today.toUTCString()));
+        }
 
-    if (null !== table) {
-        var report = new Report(request);
+        if (null !== table) {
+            var report = new Report(request.reportData);
 
-        report.printData(table);
-    } else {
-        console.error('Parent table with class ".report" not found');
+            report.printData(table);
+        } else {
+            console.error('Parent table with class ".report" not found');
+        }
     }
 });
