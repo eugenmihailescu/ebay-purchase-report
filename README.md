@@ -12,7 +12,7 @@ Firefox 45+
 
 # Install the add-on
 
-1. Download the Mozilla Signed add-on file from []()
+1. Download the Mozilla Signed add-on file from [dist](https://github.com/eugenmihailescu/ebay-purchase-report/tree/master/dist) folder
 2. Open your Firefox browser. Go to Tools -> `Add-ons` menu (Ctrl + Shift + A)
 3. On the top-right (near the `Search add-on` input) there is a `tools` drop-down button. Click that button and choose `Install Add-on From File` 
 4. Choose the file downloaded at step (1)
