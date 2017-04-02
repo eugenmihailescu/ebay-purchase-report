@@ -1,0 +1,36 @@
+{
+	"manifest_version": 2,
+	"name": "eBay purchase history report",
+	"version": "1.0.1",
+	"description": "Generates a compact report of your eBay purchase history items",
+	"icons": {
+		"48": "icons/icon-48.png"
+	},
+	"content_scripts": [
+		{
+			"matches": [
+				"*://*.ebay.com/*"
+			],
+			"js": [
+				"script.js"
+			]
+		}
+	],
+	"background": {
+		"scripts": [
+			"background.js"
+		]
+	},
+	"permissions": [
+		"activeTab",
+		"tabs",
+		"*://*.ebay.com/*"
+	],
+	"web_accessible_resources": [
+		"report.html",
+		"report.js",
+		"report.css",
+		"icons/sort-asc.png",
+		"icons/sort-desc.png"
+	]
+}

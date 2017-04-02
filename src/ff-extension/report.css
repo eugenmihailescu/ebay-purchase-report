@@ -1,0 +1,92 @@
+@CHARSET "UTF-8";
+
+.report, .report-date-wrapper, h2 {
+	text-align: center;
+	font-family: monospace;
+}
+
+.report {
+	text-align: inherit;
+	border: 1px solid #ccc;
+	padding: 1em;
+	border-collapse: collapse;
+	background-color: #fff;
+	color: #555;
+	box-shadow: 0 0 5px;
+	margin-top: 2em;
+	margin-bottom: 2em;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.report tr:HOVER {
+	background-color: #eee;
+	cursor: pointer;
+}
+
+.wide td, .wide th {
+	padding-top: 1em !important;
+	padding-bottom: 1em !important;
+	background-color: #F4AE01 !important;
+	color: #000 !important;
+	text-align: center;
+}
+
+.report th:LAST-CHILD {
+	text-align: inherit;
+}
+
+.report td {
+	border-left: 1px solid #ccc;
+	border-bottom: 1px solid #ccc;
+	padding: 0.5em;
+}
+
+.report td:last-child {
+	border-right: 1px solid #ccc;
+}
+
+.report td:nth-child(1), .report td:nth-child(2), .report td:nth-child(4), .report td:nth-child(5) {
+	text-align: center;
+}
+
+.report td:nth-child(3) {
+	text-align: right;
+}
+
+.group-footer, .group-footer:HOVER, .wide:HOVER {
+	background-color: #AAA !important;
+	color: #FFF !important;
+	cursor: default !important;
+}
+
+.group-footer td:FIRST-CHILD {
+	font-weight: bold;
+	text-align: right;
+}
+
+.group-footer td:LAST-CHILD {
+	text-align: inherit;
+}
+
+.sort-icon {
+	margin-left: 0.5em;
+	cursor: pointer;
+	width: 32px;
+	height: 9px;
+	background-repeat: no-repeat;
+	float: right;
+	display: inline;
+}
+
+.sort-asc {
+	background-image: url("icons/sort-asc.png");
+}
+
+.sort-desc {
+	background-image: url("icons/sort-desc.png");
+}
+
+.sort-column {
+	background-color: #eee;
+}
