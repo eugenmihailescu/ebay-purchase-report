@@ -35,50 +35,58 @@ function EbayReport(params) {
         return null !== element ? element.getAttribute(name) : value;
     }
 
+    /**
+     * Gather the eBay order information
+     */
     function prepare() {
-        // parse the document
+        // search for Orders list
         var orders = document.querySelectorAll('#orders .result-set-r .order-r');
-        var order, item;
 
+        if (!orders.length) {
+            return false;
+        }
+
+        var order, item;
         var data = [];
 
-        if (null !== orders) {
-            for (order in orders) {
-                if (orders.hasOwnProperty(order)) {
-                    var orderId = orders[order].querySelector('input.item-select[type=checkbox]');
-                    if (null !== orderId) {
-                        orderId = orderId.dataset.orderid;
-                    }
+        // parse the document
+        for (order in orders) {
+            if (orders.hasOwnProperty(order)) {
+                var orderId = orders[order].querySelector('input.item-select[type=checkbox]');
+                if (null !== orderId) {
+                    orderId = orderId.dataset.orderid;
+                }
 
-                    var purchaseDate = getInnerText(orders[order].querySelector('.order-row .purchase-header .row-date'), '');
-                    var orderItems = orders[order].querySelectorAll('.item-level-wrap');
+                var purchaseDate = getInnerText(orders[order].querySelector('.order-row .purchase-header .row-date'), '');
+                var orderItems = orders[order].querySelectorAll('.item-level-wrap');
 
-                    var itemIndex = 1;
+                var itemIndex = 1;
 
-                    for (item in orderItems) {
-                        if (orderItems.hasOwnProperty(item)) {
-                            var purchasePrice = getInnerText(orderItems[item].querySelector('.cost-label'), 0);
-                            var itemSpec = getInnerText(orderItems[item].querySelector('.item-spec-r .item-title'), '');
-                            var deliveryDate = getInnerText(orderItems[item]
-                                    .querySelector('.item-spec-r .delivery-date strong'), '');
-                            var shipStatus = getAttribute(orderItems[item]
-                                    .querySelector('.purchase-info-col .order-status .ph-ship'), 'title', '');
+                for (item in orderItems) {
+                    if (orderItems.hasOwnProperty(item)) {
+                        var purchasePrice = getInnerText(orderItems[item].querySelector('.cost-label'), 0);
+                        var itemSpec = getInnerText(orderItems[item].querySelector('.item-spec-r .item-title'), '');
+                        var deliveryDate = getInnerText(orderItems[item].querySelector('.item-spec-r .delivery-date strong'),
+                                '');
+                        var shipStatus = getAttribute(orderItems[item]
+                                .querySelector('.purchase-info-col .order-status .ph-ship'), 'title', '');
+                        var feedbackNotLeft = orderItems[item]
+                                .querySelector('.purchase-info-col .order-status .ph-fbl.feedbackNotLeft');
+                        var quantity = getInnerText(orderItems[item].querySelector('.qa'), "1");
 
-                            var quantity = getInnerText(orderItems[item].querySelector('.qa'), "1");
+                        data.push({
+                            orderId : orderId,
+                            itemIndex : itemIndex,
+                            purchaseDate : purchaseDate,
+                            price : purchasePrice,
+                            quantity : quantity.replace(/[\D]+/g, ''),
+                            specs : itemSpec,
+                            deliveryDate : deliveryDate,
+                            shipStatus : shipStatus.replace(/.*?([\d\/]+)/g, '$1'),
+                            feedbackNotLeft : null !== feedbackNotLeft
+                        });
 
-                            data.push({
-                                orderId : orderId,
-                                itemIndex : itemIndex,
-                                purchaseDate : purchaseDate,
-                                price : purchasePrice,
-                                quantity : quantity.replace(/[\D]+/g, ''),
-                                specs : itemSpec,
-                                deliveryDate : deliveryDate,
-                                shipStatus : shipStatus.replace(/.*?([\d\/]+)/g, '$1')
-                            });
-
-                            itemIndex += 1;
-                        }
+                        itemIndex += 1;
                     }
                 }
             }
@@ -87,6 +95,13 @@ function EbayReport(params) {
         return data;
     }
 
+    /**
+     * Sort the give data array
+     * 
+     * @param {Array}
+     *            data - The array to sort
+     * @return {Array} Returns the sorted array
+     */
     function sort(data) {
         // sort the result
         if (sortby.length) {
@@ -124,8 +139,17 @@ function EbayReport(params) {
         return data;
     }
 
+    /**
+     * Get the data sorted by the given column order
+     * 
+     * @return {Array} Returns an array of order items
+     */
     this.get_data = function() {
-        return sort(prepare());
+        var data = prepare();
+        if (false !== data) {
+            data = sort(data);
+        }
+        return data;
     };
 }
 
@@ -241,6 +265,9 @@ if (parent) {
     });
 }
 
+/**
+ * Listen for messages from the background script
+ */
 browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.hasOwnProperty('sortBy')) {
         onButtonClick(request);

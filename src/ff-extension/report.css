@@ -1,8 +1,11 @@
 @CHARSET "UTF-8";
 
+body {
+	font-family: monospace;
+}
+
 .report, .report-date-wrapper, h2 {
 	text-align: center;
-	font-family: monospace;
 }
 
 .report {
@@ -17,6 +20,22 @@
 	margin-bottom: 2em;
 	margin-left: auto;
 	margin-right: auto;
+}
+
+.report-date {
+	
+}
+
+.report-legend {
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.report-legend td {
+	padding: 1em;
+	max-width: 10em;
+	border: 1px solid #ccc;
+	border-radius: .5em;
 }
 
 .report tr:HOVER {
@@ -91,4 +110,74 @@
 
 .sort-column {
 	background-color: #eee;
+}
+
+.error-message-wrapper {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	height: 100px;
+	width: 500px;
+	margin-top: -60px;
+	margin-left: -260px;
+	background-color: #4169E1;
+	border-radius: 0.5em;
+	opacity: 1;
+	box-shadow: 0 0 1em #000;
+	cursor: pointer;
+	border: 6px dashed tomato;
+}
+
+.error-message-inner {
+	height: 100%;
+	background-color: white;
+}
+
+.error-message {
+	position: relative;
+	top: 50%;
+	transform: translateY(-50%);
+	text-align: center;
+}
+
+.fade-out {
+	-webkit-transition: opacity 0.5 ease-in-out;
+	-moz-transition: opacity 0.5s ease-in-out;
+	-ms-transition: opacity 0.5s ease-in-out;
+	-o-transition: opacity 0.5s ease-in-out;
+	opacity: 0;
+}
+
+.report-footer {
+	margin-left: auto;
+	margin-right: auto;
+	text-align: center;
+}
+
+.addon-info {
+	
+}
+
+.addon-icon {
+	
+}
+
+.platform-info {
+	
+}
+
+.delayed-shipment {
+	background-color: #FFD0C7;
+}
+
+.not-delivered {
+	background-color: #FAFAD2;
+}
+
+.not-received {
+	background-color: #FF6347;
+}
+
+.received {
+	background-color: #D6FDD6;
 }
