@@ -22,7 +22,9 @@ Firefox 45+
 1. Open the eBay page and log-in using your eBay account
 2. Go to the My eBay -> `Purchase history` menu
 3. When the page loads you will notice a golden `Quick Report` button on the Orders group box
+![alt text](http://mynixworld.info/wp-content/uploads/2013/04/ebay-purchase-history.png "Click the Quick Report button")
 4. Click the `Quick Report` button. A new tab will open containing a compact HTML report of your eBay purchase history.
+![alt text](http://mynixworld.info/wp-content/uploads/2013/04/ebay-purchase-history-report.png "Samle report")
 
 Please note that the report will include only visible items. For instance, if you chose to see only 25 `Orders per page` then the report will include only these orders. To include the whole history make sure you choose the largest `Orders per page` option available (eg. 100).
 
