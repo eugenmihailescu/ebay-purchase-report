@@ -32,9 +32,10 @@ body {
 }
 
 .report-legend {
-	right: 0px;
+	right: 1em;
 	top: 0px;
 	position: absolute;
+	list-style: none;
 }
 
 .report-filters {
@@ -49,7 +50,7 @@ body {
 	font-weight: bold;
 }
 
-.report-legend td {
+.report-legend li {
 	padding: 1em;
 	max-width: 10em;
 	border: 1px solid #ccc;

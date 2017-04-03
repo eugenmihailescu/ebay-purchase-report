@@ -255,14 +255,14 @@ function Report(params) {
      *            attrs - The attributes of the legend item
      */
     function updateLegend(attrs) {
-        var reportLegend = document.body.querySelector('.report-legend tr');
+        var reportLegend = document.body.querySelector('.report-legend');
 
         if (null === reportLegend || null !== reportLegend.querySelector("." + attrs['class'])) {
             return;
         }
 
         // append the legend entry
-        appendElement(reportLegend, 'td', attrs['title'], attrs);
+        appendElement(reportLegend, 'li', attrs['title'], attrs);
     }
 
     /**
@@ -473,12 +473,12 @@ function showError(message) {
  */
 browser.runtime.onMessage.addListener(function(request, sender, sendRespose) {
     if (request.hasOwnProperty('reportData')) {
-        var reportDate = document.querySelector('.report-date');
+        var reportDate = document.querySelector('.report-date-wrapper');
         var table = document.querySelector('.report');
 
         if (null !== reportDate) {
             var today = new Date();
-            reportDate.appendChild(document.createTextNode(today.toUTCString()));
+            appendElement(reportDate, 'span', "(generated at " + today.toUTCString() + ")");
         }
 
         if (null !== table) {

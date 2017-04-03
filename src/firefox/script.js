@@ -146,15 +146,24 @@ function EbayReport(params) {
             return false;
         }
 
-        var result = [];
-        
+        var result = [], f;
+
         filters.forEach(function(filter, index) {
-            var f = {
+            f = {
                 label : getInnerText(filter.querySelector('.filter-label')),
                 content : getInnerText(filter.querySelector('.filter-content'))
             };
             result.push(f);
         });
+
+        var itemPage = document.querySelector('#orders .num-items-page');
+        if (null !== itemPage) {
+            f = {
+                label : getInnerText(itemPage.querySelector('span')),
+                content : getInnerText(itemPage.querySelector('li>span[title=selected]'))
+            };
+            result.push(f);
+        }
 
         return result;
     }
