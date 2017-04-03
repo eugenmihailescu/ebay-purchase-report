@@ -1,3 +1,5 @@
+var agent = "undefined" !== typeof chrome ? chrome : browser;
+
 /**
  * Collects the eBay purchase history data from the current page and prints-out a report in the given format.
  */
@@ -148,7 +150,7 @@ function EbayReport(params) {
 
         var result = [], f;
 
-        filters.forEach(function(filter, index) {
+        Array.prototype.forEach.call(filters, function(filter, index) {
             f = {
                 label : getInnerText(filter.querySelector('.filter-label')),
                 content : getInnerText(filter.querySelector('.filter-content'))
@@ -204,7 +206,7 @@ function onButtonClick(params) {
     var data = ebay_report.get_data();
 
     // push the data to the web extension
-    browser.runtime.sendMessage({
+    agent.runtime.sendMessage({
         reportData : {
             orders : data.orders,
             filters : data.filters,
@@ -229,17 +231,17 @@ function onShowItem(params) {
 
     var orders = document.querySelectorAll('#orders .result-set-r .order-r');
     if (null !== orders) {
-        orders.forEach(function(order, index) {
+        Array.prototype.forEach.call(orders, function(order, index) {
             var found = order.querySelector('input[type="checkbox"][data-orderid="' + params.showItem.orderId + '"');
             if (null !== found) {
                 var orderItems = order.querySelectorAll('.item-level-wrap');
                 var i;
                 if (null !== orderItems) {
-                    orderItems.forEach(function(value, index) {
+                    Array.prototype.forEach.call(orderItems, function(value, index) {
                         if (index === params.showItem.index - 1) {
                             var link = value.querySelector('.item-spec-r .item-title');
                             if (null !== link) {
-                                browser.runtime.sendMessage({
+                                agent.runtime.sendMessage({
                                     showEbayItem : true,
                                     url : link.getAttribute("href")
                                 });
@@ -302,7 +304,7 @@ if (parent) {
 /**
  * Listen for messages from the background script
  */
-browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+agent.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.hasOwnProperty('sortBy')) {
         onButtonClick(request);
     }

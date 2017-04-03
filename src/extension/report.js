@@ -1,3 +1,5 @@
+var agent = "undefined" !== typeof chrome ? chrome : browser;
+
 /**
  * Create a new DOM element
  * 
@@ -72,9 +74,8 @@ function Report(params) {
     function addHeader(parent) {
         var sortByColumn = function(event) {
             var name = event.target.getAttribute("name");
-            var current = browser.tabs.getCurrent();
-            current.then(function(tab) {
-                browser.runtime.sendMessage({
+	    agent.tabs.getCurrent(function(tab) {
+                agent.runtime.sendMessage({
                     tabId : tab.id,
                     sortBy : name,
                     reverseorder : !reverseorder
@@ -143,15 +144,14 @@ function Report(params) {
         };
 
         if (footer.platform) {
-            var platformPromise = browser.runtime.getPlatformInfo();
-            platformPromise.then(function(platform) {
+            var platformPromise = agent.runtime.getPlatformInfo(function(platform) {
                 var text = 'running on ' + platform.os.charAt(0).toUpperCase() + platform.os.slice(1) + ' ' + platform.arch;
                 appendElement(footer.platform, 'span', text);
             });
         }
 
         if (footer.addon) {
-            var manifest = browser.runtime.getManifest();
+            var manifest = agent.runtime.getManifest();
 
             if (footer.icon) {
                 appendElement(footer.icon, 'img', null, {
@@ -296,7 +296,7 @@ function Report(params) {
         dataset = dataset || {};
 
         var onRowClick = function(event) {
-            browser.runtime.sendMessage({
+            agent.runtime.sendMessage({
                 showItem : {
                     orderId : event.target.parentElement.dataset.orderid,
                     index : event.target.parentElement.dataset.index
@@ -471,7 +471,7 @@ function showError(message) {
 /**
  * Listen for messages received from the background script
  */
-browser.runtime.onMessage.addListener(function(request, sender, sendRespose) {
+agent.runtime.onMessage.addListener(function(request, sender, sendRespose) {
     if (request.hasOwnProperty('reportData')) {
         var reportDate = document.querySelector('.report-date-wrapper');
         var table = document.querySelector('.report');
