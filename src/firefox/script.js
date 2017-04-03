@@ -139,6 +139,26 @@ function EbayReport(params) {
         return data;
     }
 
+    function getEbayFilters() {
+        var filters = document.querySelectorAll('#orders .filter');
+
+        if (!filters.length) {
+            return false;
+        }
+
+        var result = [];
+        
+        filters.forEach(function(filter, index) {
+            var f = {
+                label : getInnerText(filter.querySelector('.filter-label')),
+                content : getInnerText(filter.querySelector('.filter-content'))
+            };
+            result.push(f);
+        });
+
+        return result;
+    }
+
     /**
      * Get the data sorted by the given column order
      * 
@@ -149,7 +169,11 @@ function EbayReport(params) {
         if (false !== data) {
             data = sort(data);
         }
-        return data;
+
+        return {
+            orders : data,
+            filters : getEbayFilters()
+        };
     };
 }
 
@@ -173,7 +197,8 @@ function onButtonClick(params) {
     // push the data to the web extension
     browser.runtime.sendMessage({
         reportData : {
-            orders : data,
+            orders : data.orders,
+            filters : data.filters,
             sortby : params.sortBy,
             reverseorder : params.reverseorder,
             tabId : params.hasOwnProperty('tabId') ? params.tabId : null

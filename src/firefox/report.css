@@ -26,9 +26,27 @@ body {
 	
 }
 
-.report-legend {
+.report-filters, .report-legend {
 	margin-left: auto;
 	margin-right: auto;
+}
+
+.report-legend {
+	right: 0px;
+	top: 0px;
+	position: absolute;
+}
+
+.report-filters {
+	border-top: 1px solid #ccc;
+	border-bottom: 1px solid #cccc;
+	margin-top: 1em;
+	margin-bottom: 1em;
+}
+
+.report-filters td:FIRST-CHILD {
+	text-align: right;
+	font-weight: bold;
 }
 
 .report-legend td {

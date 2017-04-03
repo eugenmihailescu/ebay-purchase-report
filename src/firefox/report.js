@@ -42,6 +42,7 @@ function Report(params) {
     var sortby = params.sortby || "";
     var reverseorder = params.reverseorder || false;
     var orders = params.orders || [];
+    var filters = params.filters || [];
     var highlight = params.highlight || {};
     highlight.delayedShipment = highlight.delayedShipment || {
         days : 5,
@@ -248,18 +249,37 @@ function Report(params) {
     }
 
     /**
+     * Add a legend item with the given attributes
+     * 
      * @param {Object}
-     *            attrs - The
+     *            attrs - The attributes of the legend item
      */
     function updateLegend(attrs) {
-        var legend = document.body.querySelector('.report-legend tr');
+        var reportLegend = document.body.querySelector('.report-legend tr');
 
-        if (null === legend || null !== legend.querySelector("." + attrs['class'])) {
+        if (null === reportLegend || null !== reportLegend.querySelector("." + attrs['class'])) {
             return;
         }
 
         // append the legend entry
-        appendElement(legend, 'td', attrs['title'], attrs);
+        appendElement(reportLegend, 'td', attrs['title'], attrs);
+    }
+
+    /**
+     * Add the report filters in the report header
+     */
+    function updateFilters() {
+        var reportFilter = document.body.querySelector('.report-filters');
+
+        if (null === reportFilter) {
+            return;
+        }
+
+        filters.forEach(function(filter, index) {
+            var entry = appendElement(reportFilter, 'tr');
+            appendElement(entry, 'td', filter.label + ' :');
+            appendElement(entry, 'td', filter.content);
+        });
     }
 
     /**
@@ -341,6 +361,8 @@ function Report(params) {
         while (parent.hasChildNodes()) {
             parent.removeChild(parent.lastChild);
         }
+
+        updateFilters();
 
         addHeader(parent);
 
