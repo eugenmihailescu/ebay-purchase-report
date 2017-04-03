@@ -1,7 +1,6 @@
 /**
  * Collects the eBay purchase history data from the current page and prints-out a report in the given format.
  */
-
 function EbayReport(params) {
     params = params || {};
 
@@ -130,6 +129,12 @@ function EbayReport(params) {
     };
 }
 
+/**
+ * Get the report data and push it to the background script
+ * 
+ * @param {Object=}
+ *            params - Optional. An object of parameters to pass to the report
+ */
 function onButtonClick(params) {
     params = params || {
         sortby : "",
@@ -152,6 +157,12 @@ function onButtonClick(params) {
     });
 }
 
+/**
+ * Sends the order item URL to the background script
+ * 
+ * @param {Object}
+ *            params - An Object describing what order item to query.
+ */
 function onShowItem(params) {
     params = params || false;
 
@@ -184,16 +195,22 @@ function onShowItem(params) {
     }
 }
 
-// inject the Report button into the eBay purchase history page
-var parent = document.querySelector('#orders .container-header');
-if (parent) {
-    var button_class = "ebay-purchase-report";
-    var old_button = parent.querySelector("." + button_class);
+/**
+ * Creates the `Quick report` link at DOM level
+ * 
+ * @param {Object}
+ *            parent - The parent element where the link is appended
+ * @param {String}
+ *            classname - The link CSS class name
+ * @returns {Object} - Returns the newly created element
+ */
+function createButton(parent, classname) {
+    var button = parent.querySelector("." + classname);
 
-    if (null === old_button) {
-        var button = document.createElement('a');
+    if (null === button) {
+        button = document.createElement('a');
         button.innerHTML = "Quick Report";
-        button.setAttribute("class", button_class);
+        button.setAttribute("class", classname);
         button.setAttribute("href", "#");
         button.setAttribute("style", "float:right;padding:3px;background-color:#FFD700;color:#000");
         button.addEventListener("click", function(event) {
@@ -201,6 +218,27 @@ if (parent) {
         });
         parent.appendChild(button);
     }
+
+    return button;
+}
+
+// inject the Report button into the eBay purchase history page
+var parent = document.querySelector('#orders .container-header');
+if (parent) {
+
+    var button_class = "ebay-purchase-report";
+
+    createButton(parent, button_class);
+
+    // respawn the button whenever is necessary
+    var observer = new MutationObserver(function(mutations) {
+        createButton(parent, button_class);
+    });
+
+    // start monitoring the any DOM changes of parent's childList only
+    observer.observe(parent, {
+        childList : true
+    });
 }
 
 browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
