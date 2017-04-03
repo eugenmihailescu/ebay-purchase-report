@@ -14,8 +14,8 @@ Tested on Linux with Firefox 45+, Chrome 55+, Opera 36+. It should work also on 
 
 1. Download the Chrome|Opera .crx add-on file or the Mozilla signed .xpi add-on file from [dist](https://github.com/eugenmihailescu/ebay-purchase-report/tree/master/dist) folder
 2. Open your browser Tools -> `Extension`|`Add-ons` menu
-	2.1 On Firefox on the top-right (near the `Search add-on` input) there is a `tools` drop-down button. Click that button and choose `Install Add-on From File`. Choose the file downloaded at step (1)
-	2.2 On Chrome|Opera just drag & drop the .crx file downloaded at (1) over the `Extension` list. It will automatically suggest you to `Drop to install` 
+	* On Firefox on the top-right (near the `Search add-on` input) there is a `tools` drop-down button. Click that button and choose `Install Add-on From File`. Choose the file downloaded at step (1)
+	* On Chrome|Opera just drag & drop the .crx file downloaded at (1) over the `Extension` list. It will automatically suggest you to `Drop to install` 
 
 That's all!
 
