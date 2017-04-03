@@ -73,7 +73,7 @@ web-ext -s $EXT_SRC -a $EXT_DIST --api-key=<your-addons.mozilla.org-api-key> --a
 crxmake --pack-extension=$EXT_SRC --extension-output=$EXT_DIST/$EXT_NAME-$EXT_VER.crx --key-output=$EXT_DIST/$EXT_NAME-$EXT_VER.pem
 ```
 Please note that in case of Firefox you should:
-1. enroll for an API key (see `--api-key` and `--api-secret`)
+1. [generate your Mozilla API key](https://addons.mozilla.org/en-US/developers/addon/api/key/) (see `--api-key` and `--api-secret`)
 2. manually submit only-once your forked add-on to [Mozilla's Add-ons aka AMO](https://addons.mozilla.org/en-US/developers/addons), grab the newly generated add-on `UUID` and use it on the above script.
 
 # What's Next
