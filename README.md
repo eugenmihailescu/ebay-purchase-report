@@ -44,6 +44,8 @@ By default the report would include the following columns:
  
 By default the report would generate a group footer subtotal for each date/currency value. This group footer shows the item count within group, their total amount, how many are shipped/not-shipped and the average price per item.
 The report will print also a grand total for the entire report.
+
+Starting with v1.0.7 it will also show the item's thumbnail picture while moving the mouse over the item :-)
  
 # Sort ordering
 
