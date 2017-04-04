@@ -14,7 +14,12 @@ var agent = "undefined" !== typeof chrome ? chrome : browser;
  * @returns {Element} Returns the new created element
  */
 function appendElement(parent, tag, text, attrs) {
-    var e = document.createElement(tag);
+    if ('undefined' !== typeof tag && '' != String(tag)) {
+        var e = document.createElement(tag);
+    } else {
+        e = parent;
+    }
+
     if ('undefined' !== typeof text && text) {
         e.appendChild(document.createTextNode(text));
     }
@@ -26,9 +31,38 @@ function appendElement(parent, tag, text, attrs) {
             }
         }
     }
-    parent.appendChild(e);
+
+    if (e !== parent) {
+        parent.appendChild(e);
+    }
 
     return e;
+}
+
+function Platform(callback) {
+    var response = {};
+    var callbacks = [];
+
+    function notifyCallbacks() {
+        if (response.hasOwnProperty('browser') && response.hasOwnProperty('info')) {
+            callbacks.forEach(function(callback) {
+                callback(response.info, response.browser);
+            });
+        }
+    }
+
+    callbacks.push(callback);
+    notifyCallbacks();
+
+    agent.runtime.getBrowserInfo(function(browser) {
+        response.browser = browser;
+        notifyCallbacks();
+
+    });
+    agent.runtime.getPlatformInfo(function(platform) {
+        response.info = platform;
+        notifyCallbacks();
+    });
 }
 
 /**
@@ -66,6 +100,128 @@ function Report(params) {
         "class" : "received"
     };
 
+    var manifest = agent.runtime.getManifest();
+    var platform = {};
+
+    // prepare export data
+    var reportExport = document.body.querySelector('.export-report');
+    if (null !== reportExport) {
+        var i, mime = {
+            csv : 'text/csv',
+            json : 'application/json',
+            xml : 'application/xml'
+        };
+
+        appendElement(reportExport, 'label', 'Export as:');
+
+        for (i in mime) {
+            if (mime.hasOwnProperty(i)) {
+                var blob = new Blob([ getExportData(i) ], {
+                    type : mime[i]
+                });
+                appendElement(reportExport, 'a', i.toUpperCase(), {
+                    "href" : URL.createObjectURL(blob),
+                    "downlod" : 'data.' + i,
+                    "class" : i
+                });
+            }
+        }
+    }
+
+    function orders2Xml(array) {
+        array = array || [];
+
+        var xmlEscape = function(string) {
+            string = String(string);
+
+            var escapeChars = {
+                quot : '"',
+                apos : "'",
+                lt : '<',
+                gt : '>',
+                amp : '&'
+            }, i;
+
+            for (i in escapeChars) {
+                if (escapeChars.hasOwnProperty(i)) {
+                    string = string.replace(escapeChars[i], '&' + i + ';');
+                }
+            }
+
+            return string;
+        };
+
+        var xmlSchema = '<?xml version="1.0" encoding="UTF-8" ?>';
+
+        var signature = '<generator type="WebExtension" name="' + xmlEscape(manifest.name) + '" version="'
+                + xmlEscape(manifest.version) + '" author="' + xmlEscape(manifest.author) + '" homepage="'
+                + manifest.homepage_url + '" description="' + manifest.description + '"></generator>';
+
+        // make sure the array is ordered by OrderId,itemIndex
+        array = array.sort(function(a, b) {
+            if (a.orderId < b.orderId) {
+                return a;
+            } else if (a.orderId == b.orderId) {
+                if (a.itemIndex < b.itemIndex) {
+                    return a;
+                }
+            }
+            return b;
+        });
+
+        var rows = [], lastOrderId = null;
+        array.forEach(function(order, index) {
+            // close `order` tag on orderId change
+            if (lastOrderId !== order.orderId) {
+                rows.push((null !== lastOrderId ? '</items></order>' : '') + '<order id="' + xmlEscape(order.orderId)
+                        + '" purchaseDate="' + xmlEscape(order.purchaseDate) + '"><items>');
+                lastOrderId = order.orderId;
+            }
+
+            var i, attrs = [];
+            for (i in order) {
+                if ('orderId' !== i && 'purchaseDate' !== i && order.hasOwnProperty(i)) {
+                    attrs.push(i + '="' + xmlEscape(order[i]) + '"');
+                }
+            }
+            rows.push('<item ' + attrs.join(' ') + '></item>');
+        });
+
+        if (null !== lastOrderId) {
+            rows.push('</items></order>');
+        }
+
+        return xmlSchema + "<orders>" + signature + rows.join("") + "</orders>";
+    }
+
+    function getExportData(format) {
+        var result = '';
+        switch (format) {
+        case 'json':
+            result = JSON.stringify(orders);
+            break;
+        case 'xml':
+            result = orders2Xml(orders);
+            break;
+        case 'csv':
+            orders.forEach(function(order, index) {
+                if ('' == result) {
+                    result += Object.keys(order).join("\t") + "\n";
+                }
+                var line = [], i;
+                for (i in order) {
+                    if (order.hasOwnProperty(i)) {
+                        line.push(order[i]);
+                    }
+                }
+                result += line.join("\t") + "\n";
+            });
+            break;
+        }
+
+        return result;
+    }
+
     /**
      * Creates the report header
      * 
@@ -74,7 +230,7 @@ function Report(params) {
     function addHeader(parent) {
         var sortByColumn = function(event) {
             var name = event.target.getAttribute("name");
-	    agent.tabs.getCurrent(function(tab) {
+            agent.tabs.getCurrent(function(tab) {
                 agent.runtime.sendMessage({
                     tabId : tab.id,
                     sortBy : name,
@@ -140,27 +296,28 @@ function Report(params) {
         var footer = {
             addon : document.querySelector('.report-footer .addon-info'),
             icon : document.querySelector('.report-footer .addon-icon'),
-            platform : document.querySelector('.report-footer .platform-info')
+            selector : document.querySelector('.report-footer .platform-info')
         };
 
-        if (footer.platform) {
-            var platformPromise = agent.runtime.getPlatformInfo(function(platform) {
-                var text = 'running on ' + platform.os.charAt(0).toUpperCase() + platform.os.slice(1) + ' ' + platform.arch;
-                appendElement(footer.platform, 'span', text);
+        if (null !== footer.selector) {
+            Platform(function(info, browser) {
+                var text = 'running on ' + browser.vendor + ' ' + browser.name + ' v' + browser.version + ' / '
+                        + info.os.charAt(0).toUpperCase() + info.os.slice(1) + ' ' + info.arch;
+                appendElement(footer.selector, 'span', text);
             });
         }
 
         if (footer.addon) {
-            var manifest = agent.runtime.getManifest();
-
             if (footer.icon) {
                 appendElement(footer.icon, 'img', null, {
                     src : manifest.icons[32]
                 });
             }
 
-            var text = manifest.name + ' v' + manifest.version;
-            appendElement(footer.addon, 'span', text);
+            var text = manifest.short_name + ' v' + manifest.version;
+            appendElement(footer.addon, 'a', text, {
+                href : manifest.homepage_url
+            });
         }
     }
 
@@ -283,6 +440,18 @@ function Report(params) {
     }
 
     /**
+     * Add the report title
+     */
+    function updateTitle() {
+        var reportTitle = document.body.querySelector('h2.report-title');
+        if (null === reportTitle) {
+            return;
+        }
+
+        appendElement(reportTitle, null, manifest.name);
+    }
+
+    /**
      * Adds a new row for the given fields by padding their values with spaces if not having a given minimum length.
      * 
      * @param {Object}
@@ -361,6 +530,8 @@ function Report(params) {
         while (parent.hasChildNodes()) {
             parent.removeChild(parent.lastChild);
         }
+
+        updateTitle();
 
         updateFilters();
 

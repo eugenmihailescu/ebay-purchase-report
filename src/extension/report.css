@@ -200,3 +200,15 @@ body {
 .received {
 	background-color: #D6FDD6;
 }
+
+.export-report {
+	
+}
+
+.export-report .csv, .export-report .json, .export-report .xml {
+	margin-left: 0.5em;
+}
+
+.report-title {
+	
+}
