@@ -8,7 +8,7 @@ This project provides a Firefox|Chrome|Opera Web Extension (add-on) that aids in
 
 # Requirements
 
-Tested on Linux with Firefox 45+, Chrome 55+, Opera 36+. It should work also on Windows or MacOS. Not tested on Microsoft Edge, Android or iPhone but who knows, it might just work :-)
+Tested on Linux with Firefox 45+, Chrome 55+, Opera 36+. It should work also on Windows or MacOS. Not built/tested on Microsoft Edge, Android or iPhone but who knows, it might just work :-)
 
 # Install the add-on
 
@@ -70,7 +70,7 @@ The building commands can be encapsulated within a Bourne shell script (that wou
 #!/bin/bash
 
 EXT_NAME=ebay_purchase_report_history
-EXT_PATH=<path-to-the-local-source-dir>
+EXT_PATH=${0%/*} # ;-)
 EXT_SRC=$EXT_PATH/src/extension
 EXT_DIST=$EXT_PATH/dist
 EXT_VER=$(cat $EXT_SRC/manifest.json |grep '"version"'|grep -Eow "[0-9.]+")
