@@ -78,6 +78,8 @@ function EbayReport(params) {
                                 .querySelector('.purchase-info-col .order-status .ph-fbl.feedbackNotLeft');
                         var quantity = getInnerText(orderItems[item].querySelector('.qa'), "1");
 
+                        var thumbnail = getAttribute(orderItems[item].querySelector('.picCol .lazy-img'), 'src', '');
+
                         data.push({
                             orderId : orderId,
                             seller : {
@@ -91,7 +93,8 @@ function EbayReport(params) {
                             specs : itemSpec,
                             deliveryDate : deliveryDate,
                             shipStatus : shipStatus.replace(/.*?([\d\/]+)/g, '$1'),
-                            feedbackNotLeft : null !== feedbackNotLeft
+                            feedbackNotLeft : null !== feedbackNotLeft,
+                            thumbnail : thumbnail
                         });
 
                         itemIndex += 1;

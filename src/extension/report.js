@@ -275,6 +275,13 @@ function Report(params) {
         return Object.keys(cols).length;
     }
 
+    function addWideRow(parent, attrs) {
+        var row = appendElement(parent, 'tr', null, attrs);
+        row.addEventListener('mouseover', updateThumbnail);
+
+        return row;
+    }
+
     /**
      * Creates the report header
      * 
@@ -294,7 +301,7 @@ function Report(params) {
 
         var cols = getColumns();
 
-        var row = appendElement(parent, 'tr', null, {
+        var row = addWideRow(parent, {
             "class" : "wide"
         });
 
@@ -368,7 +375,7 @@ function Report(params) {
     function addGrpFooter(parent, label, value, currency, count, shipped, attrs) {
         attrs = attrs || {};
         attrs["class"] = (attrs.hasOwnProperty("class") ? attrs["class"] : "") + " group-footer";
-        var row = appendElement(parent, 'tr', null, attrs);
+        var row = addWideRow(parent, attrs);
 
         appendElement(row, 'td', label, {
             "colspan" : 2
@@ -478,6 +485,18 @@ function Report(params) {
     }
 
     /**
+     * Update the target element thumbnail image on mouse-over
+     */
+    function updateThumbnail(event) {
+        var src = event.currentTarget.getAttribute("data-thumbnail");
+        if (null !== src && src.length) {
+            document.getElementById('thumbnail').setAttribute("src", src);
+        } else {
+            document.getElementById('thumbnail').removeAttribute("src");
+        }
+    }
+
+    /**
      * Adds a new row for the given fields by padding their values with spaces if not having a given minimum length.
      * 
      * @param {Object}
@@ -509,6 +528,8 @@ function Report(params) {
         }
 
         var row = appendElement(parent, 'tr', false, attrs);
+        row.addEventListener('mouseover', updateThumbnail);
+
         for (f in dataset) {
             if (dataset.hasOwnProperty(f)) {
                 row.dataset[f] = dataset[f];
@@ -628,7 +649,8 @@ function Report(params) {
             // print the item's row
             addRow(parent, itemData, {
                 orderid : e.orderId,
-                index : e.itemIndex
+                index : e.itemIndex,
+                thumbnail : e.thumbnail
             });
 
             j += 1;
@@ -653,6 +675,15 @@ function Report(params) {
         }
 
         addReportFooter();
+
+        parent.addEventListener("mouseenter", function(event) {
+            var el = document.getElementById('thumbnail');
+            el.className = el.className.replace(/\bhidden/, '')
+        });
+        parent.addEventListener("mouseleave", function(event) {
+            var el = document.getElementById('thumbnail');
+            el.className += " hidden";
+        });
     };
 }
 

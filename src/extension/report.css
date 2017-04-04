@@ -212,3 +212,18 @@ body {
 .report-title {
 	
 }
+
+.thumbnail {
+	position: fixed;
+	left: 1em;
+	top: 1em;
+}
+
+#thumbnail {
+	box-shadow: 0 0 5px;
+	border-radius: 1em;
+}
+
+.hidden {
+	display: none;
+}
