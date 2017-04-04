@@ -59,6 +59,8 @@ function EbayReport(params) {
                     orderId = orderId.dataset.orderid;
                 }
 
+                var sellerName = getInnerText(orders[order].querySelector('.order-item-count .seller-id'), '');
+                var sellerUrl = getAttribute(orders[order].querySelector('.order-item-count .seller-id'), 'href', '');
                 var purchaseDate = getInnerText(orders[order].querySelector('.order-row .purchase-header .row-date'), '');
                 var orderItems = orders[order].querySelectorAll('.item-level-wrap');
 
@@ -78,6 +80,10 @@ function EbayReport(params) {
 
                         data.push({
                             orderId : orderId,
+                            seller : {
+                                name : sellerName,
+                                url : sellerUrl
+                            },
                             itemIndex : itemIndex,
                             purchaseDate : purchaseDate,
                             price : purchasePrice,
@@ -108,13 +114,12 @@ function EbayReport(params) {
         // sort the result
         if (sortby.length) {
             // sort by non-date field
-            var sort1 = function(a, b) {
-                if (sortby)
-                    return reverseorder ? a[sortby] < b[sortby] : a[sortby] > b[sortby];
+            var sortByText = function(a, b) {
+                return reverseorder ? a[sortby] < b[sortby] : a[sortby] > b[sortby];
             };
 
             // sort by date field
-            var sort2 = function(a, b) {
+            var sortByDate = function(a, b) {
                 var date1 = Date.parse(a[sortby].replace(/.*-\s*/g, ''));
                 var date2 = Date.parse(b[sortby].replace(/.*-\s*/g, ''));
 
@@ -122,19 +127,25 @@ function EbayReport(params) {
             };
 
             // sort by number
-            var sort3 = function(a, b) {
+            var sortByNumeric = function(a, b) {
                 var num1 = parseFloat(a[sortby].replace(/[^\d.]+/g, ''));
                 var num2 = parseFloat(b[sortby].replace(/[^\d.]+/g, ''));
 
                 return reverseorder ? num2 - num1 : num1 - num2;
             };
 
+            var sortBySeller = function(a, b) {
+                return reverseorder ? a[sortby]["name"] < b[sortby]["name"] : a[sortby]["name"] > b[sortby]["name"];
+            };
+
             if ('price' == sortby) {
-                data.sort(sort3);
+                data.sort(sortByNumeric);
+            } else if ('seller' == sortby) {
+                data.sort(sortBySeller);
             } else if ('purchaseDate' != sortby && 'deliveryDate' != sortby && 'shipStatus' != sortby) {
-                data.sort(sort1);
+                data.sort(sortByText);
             } else {
-                data.sort(sort2);
+                data.sort(sortByDate);
             }
         }
 

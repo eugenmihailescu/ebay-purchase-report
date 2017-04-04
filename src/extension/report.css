@@ -86,11 +86,11 @@ body {
 	border-right: 1px solid #ccc;
 }
 
-.report td:nth-child(1), .report td:nth-child(2), .report td:nth-child(4), .report td:nth-child(5) {
+.report td:nth-child(1), .report td:nth-child(3), .report td:nth-child(5), .report td:nth-child(6) {
 	text-align: center;
 }
 
-.report td:nth-child(3) {
+.report td:nth-child(4) {
 	text-align: right;
 }
 

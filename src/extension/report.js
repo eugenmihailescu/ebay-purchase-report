@@ -152,10 +152,11 @@ function Report(params) {
         };
 
         var xmlSchema = '<?xml version="1.0" encoding="UTF-8" ?>';
-
-        var signature = '<generator type="WebExtension" name="' + xmlEscape(manifest.name) + '" version="'
-                + xmlEscape(manifest.version) + '" author="' + xmlEscape(manifest.author) + '" homepage="'
-                + manifest.homepage_url + '" description="' + manifest.description + '"></generator>';
+        var now = new Date();
+        var signature = '<generator type="WebExtension" datetime="' + now.toUTCString() + '" alias="' + manifest.short_name
+                + '" name="' + xmlEscape(manifest.name) + '" version="' + xmlEscape(manifest.version) + '" author="'
+                + xmlEscape(manifest.author) + '" homepage="' + manifest.homepage_url + '" description="'
+                + manifest.description + '"></generator>';
 
         // make sure the array is ordered by OrderId,itemIndex
         array = array.sort(function(a, b) {
@@ -171,16 +172,18 @@ function Report(params) {
 
         var rows = [], lastOrderId = null;
         array.forEach(function(order, index) {
+            var orderCols = [ 'orderId', 'purchaseDate', 'seller' ];
             // close `order` tag on orderId change
             if (lastOrderId !== order.orderId) {
                 rows.push((null !== lastOrderId ? '</items></order>' : '') + '<order id="' + xmlEscape(order.orderId)
-                        + '" purchaseDate="' + xmlEscape(order.purchaseDate) + '"><items>');
+                        + '" purchaseDate="' + xmlEscape(order.purchaseDate) + '" seller="' + xmlEscape(order.seller.name)
+                        + '" sellerUrl="' + xmlEscape(order.seller.url) + '"><items>');
                 lastOrderId = order.orderId;
             }
 
             var i, attrs = [];
             for (i in order) {
-                if ('orderId' !== i && 'purchaseDate' !== i && order.hasOwnProperty(i)) {
+                if (orderCols.indexOf(i) < 0 && order.hasOwnProperty(i)) {
                     attrs.push(i + '="' + xmlEscape(order[i]) + '"');
                 }
             }
@@ -205,13 +208,16 @@ function Report(params) {
             break;
         case 'csv':
             orders.forEach(function(order, index) {
+                // file header
                 if ('' == result) {
                     result += Object.keys(order).join("\t") + "\n";
                 }
+
+                // file content
                 var line = [], i;
                 for (i in order) {
                     if (order.hasOwnProperty(i)) {
-                        line.push(order[i]);
+                        line.push('seller' == i ? order[i]["name"] : order[i]);
                     }
                 }
                 result += line.join("\t") + "\n";
@@ -222,26 +228,18 @@ function Report(params) {
         return result;
     }
 
-    /**
-     * Creates the report header
-     * 
-     * @params {Element} parent - The parent element where the header will be appended
-     */
-    function addHeader(parent) {
-        var sortByColumn = function(event) {
-            var name = event.target.getAttribute("name");
-            agent.tabs.getCurrent(function(tab) {
-                agent.runtime.sendMessage({
-                    tabId : tab.id,
-                    sortBy : name,
-                    reverseorder : !reverseorder
-                });
-            });
-        };
-
+    function getColumns() {
         var cols = {
             index : {
                 label : "#"
+            },
+            seller : {
+                href : {
+                    url : "url",
+                    text : "name"
+                },
+                label : "Seller",
+                sort : true
             },
             purchaseDate : {
                 label : "Purchase date",
@@ -267,6 +265,34 @@ function Report(params) {
                 label : "Item description",
             }
         };
+
+        return cols;
+    }
+
+    function getColumnsCount() {
+        var cols = getColumns();
+
+        return Object.keys(cols).length;
+    }
+
+    /**
+     * Creates the report header
+     * 
+     * @params {Element} parent - The parent element where the header will be appended
+     */
+    function addHeader(parent) {
+        var sortByColumn = function(event) {
+            var name = event.target.getAttribute("name");
+            agent.tabs.getCurrent(function(tab) {
+                agent.runtime.sendMessage({
+                    tabId : tab.id,
+                    sortBy : name,
+                    reverseorder : !reverseorder
+                });
+            });
+        };
+
+        var cols = getColumns();
 
         var row = appendElement(parent, 'tr', null, {
             "class" : "wide"
@@ -301,7 +327,7 @@ function Report(params) {
 
         if (null !== footer.selector) {
             Platform(function(info, browser) {
-                var text = 'running on ' + browser.vendor + ' ' + browser.name + ' v' + browser.version + ' / '
+                var text = 'running on ' + agent.vendor + ' ' + agent.name + ' v' + agent.version + ' / '
                         + info.os.charAt(0).toUpperCase() + info.os.slice(1) + ' ' + info.arch;
                 appendElement(footer.selector, 'span', text);
             });
@@ -345,7 +371,7 @@ function Report(params) {
         var row = appendElement(parent, 'tr', null, attrs);
 
         appendElement(row, 'td', label, {
-            "colspan" : "2"
+            "colspan" : 2
         });
 
         var text = Math.round(value, 2) + ' ' + currency + ', ' + shipped + ' shipped, ' + (count - shipped)
@@ -354,7 +380,7 @@ function Report(params) {
         text += ' ' + currency + '/item)';
 
         appendElement(row, 'td', text, {
-            "colspan" : "5"
+            "colspan" : getColumnsCount() - 2
         });
     }
 
@@ -464,6 +490,8 @@ function Report(params) {
     function addRow(parent, fields, dataset) {
         dataset = dataset || {};
 
+        var cols = getColumns();
+
         var onRowClick = function(event) {
             agent.runtime.sendMessage({
                 showItem : {
@@ -492,14 +520,26 @@ function Report(params) {
         }
 
         for (f in fields) {
-            if (fields.hasOwnProperty(f) && 'received' !== f) {
+            if (fields.hasOwnProperty(f) && cols.hasOwnProperty(f)) {
                 attr = null;
                 if (sortby == f) {
                     attr = {
                         "class" : "sort-column"
                     };
                 }
-                appendElement(row, 'td', fields[f], attr);
+
+                // in case of a href column
+                if (cols[f].hasOwnProperty('href')) {
+                    var td = appendElement(row, 'td', null, attr);
+                    var hrefCol = cols[f].href;
+                    appendElement(td, 'a', fields[f][hrefCol.text], {
+                        "href" : fields[f][hrefCol.url],
+                        "target" : "_blank"
+                    });
+                } else {
+                    // a normal text column
+                    appendElement(row, 'td', fields[f], attr);
+                }
             }
         }
     }
@@ -515,6 +555,7 @@ function Report(params) {
         var e;
         var c;
         var v;
+        var n;
         var g = 0;
         var s = 0;
         var ts = 0;
@@ -524,7 +565,11 @@ function Report(params) {
         var currency;
         var prevDate = '';
         var prevCurrency = '';
+        var prevSeller = '';
         var currencies = [];
+
+        var cols = getColumns();
+        var sortByDate = [ 'purchaseDate', 'shipStatus', 'deliveryDate' ].indexOf(sortby) >= 0;
 
         // clean-up the existent content, if any
         while (parent.hasChildNodes()) {
@@ -540,11 +585,14 @@ function Report(params) {
         for (i = 0; i < orders.length; i += 1) {
             e = orders[i];
             c = e.price.replace(/.*?([a-zA-Z]+)/g, '$1');
+            n = e.seller.name;
+
+            var newGroup = ('' == sortby || sortByDate) && (prevDate.length && e.purchaseDate != prevDate);
+            newGroup = newGroup || (prevCurrency.length && c != prevCurrency);
+            newGroup = newGroup || ('seller' == sortby && prevSeller.length && n != prevSeller);
 
             // print the group footer
-            if ((('' == sortby || 'purchaseDate' == sortby || 'shipStatus' == sortby || 'deliveryDate' == sortby)
-                    && prevDate.length && e.purchaseDate != prevDate)
-                    || (prevCurrency.length && c != prevCurrency)) {
+            if (newGroup) {
                 addGrpFooter(parent, 'SUBTOTAL', t, currency, j, s);
                 g += 1;
                 j = 0;
@@ -552,6 +600,7 @@ function Report(params) {
                 s = 0;
                 prevDate = e.purchaseDate;
                 prevCurrency = c;
+                prevSeller = n;
             }
 
             if (/\d+/g.test(e.shipStatus)) {
@@ -566,6 +615,7 @@ function Report(params) {
 
             var itemData = {
                 index : i + 1,
+                seller : e.seller,
                 purchaseDate : e.purchaseDate,
                 price : e.price,
                 quantity : e.quantity,
@@ -583,6 +633,7 @@ function Report(params) {
 
             j += 1;
             prevDate = e.purchaseDate;
+            prevSeller = e.seller.name;
             prevCurrency = currency;
             if (currencies.indexOf(prevCurrency) < 0) {
                 currencies.push(prevCurrency);
