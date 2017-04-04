@@ -61,15 +61,19 @@ function Platform(callback) {
     callbacks.push(callback);
     notifyCallbacks();
 
-    agent.runtime.getBrowserInfo(function(browser) {
-        response.browser = browser;
-        notifyCallbacks();
+    if (agent.runtime.hasOwnProperty('getBrowserInfo')) {
+        agent.runtime.getBrowserInfo(function(browser) {
+            response.browser = browser;
+            notifyCallbacks();
 
-    });
-    agent.runtime.getPlatformInfo(function(platform) {
-        response.info = platform;
-        notifyCallbacks();
-    });
+        });
+    }
+    if (agent.runtime.hasOwnProperty('getPlatformInfo')) {
+        agent.runtime.getPlatformInfo(function(platform) {
+            response.info = platform;
+            notifyCallbacks();
+        });
+    }
 }
 
 /**
