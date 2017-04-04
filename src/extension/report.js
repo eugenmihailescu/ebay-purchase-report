@@ -99,7 +99,7 @@ function Report(params) {
     };
     highlight.notDelivered = highlight.notDelivered || {
         days : 40,
-        title : "Not delivered within 40 days",
+        title : "Delivery could take 40+ days",
         "class" : "not-delivered"
     };
     highlight.itemNotReceived = highlight.itemNotReceived || {
