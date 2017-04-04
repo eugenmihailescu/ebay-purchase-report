@@ -1,3 +1,4 @@
+// Make sure it works for both, Mozilla and Chrome|Opera
 var agent = "undefined" !== typeof chrome ? chrome : browser;
 
 /**
@@ -39,6 +40,12 @@ function appendElement(parent, tag, text, attrs) {
     return e;
 }
 
+/**
+ * An asynchron helper class that provides info about the running platform
+ * 
+ * @param {callback}
+ *            callback - A callback to be notified when the platform information is available
+ */
 function Platform(callback) {
     var response = {};
     var callbacks = [];
@@ -128,6 +135,12 @@ function Report(params) {
         }
     }
 
+    /**
+     * Converts the given order array to its XML string representation
+     * 
+     * @params {Array} array - An array containing the order data
+     * @returns {string}
+     */
     function orders2Xml(array) {
         array = array || [];
 
@@ -197,6 +210,12 @@ function Report(params) {
         return xmlSchema + "<orders>" + signature + rows.join("") + "</orders>";
     }
 
+    /**
+     * Get the data exported in the given format
+     * 
+     * @params {string} format - The export format (json|csv|xml)
+     * @return {string} - Returns the exported data in the given format
+     */
     function getExportData(format) {
         var result = '';
         switch (format) {
@@ -228,6 +247,11 @@ function Report(params) {
         return result;
     }
 
+    /**
+     * Get the columns of the report
+     * 
+     * @return {Object} - Returns the columns definition
+     */
     function getColumns() {
         var cols = {
             index : {
@@ -269,12 +293,20 @@ function Report(params) {
         return cols;
     }
 
+    /**
+     * Get the report column count
+     * 
+     * @return int
+     */
     function getColumnsCount() {
         var cols = getColumns();
 
         return Object.keys(cols).length;
     }
 
+    /**
+     * Add a group|header report row
+     */
     function addWideRow(parent, attrs) {
         var row = appendElement(parent, 'tr', null, attrs);
         row.addEventListener('mouseover', updateThumbnail);
@@ -722,27 +754,53 @@ function showError(message) {
 }
 
 /**
+ * Generate the report
+ * 
+ * @param {Object}
+ *            data - The object that contains the report's data
+ */
+function print(data) {
+    var reportDate = document.querySelector('.report-date-wrapper');
+    var table = document.querySelector('.report');
+
+    if (null !== reportDate) {
+        var today = new Date();
+        appendElement(reportDate, 'span', "(generated at " + today.toUTCString() + ")");
+    }
+
+    if (null !== table) {
+        var report = new Report(data);
+        report.printData(table);
+    } else {
+        console.error('Parent table with class ".report" not found');
+    }
+}
+/**
  * Listen for messages received from the background script
  */
 agent.runtime.onMessage.addListener(function(request, sender, sendRespose) {
     if (request.hasOwnProperty('reportData')) {
-        var reportDate = document.querySelector('.report-date-wrapper');
-        var table = document.querySelector('.report');
+        print(request.reportData);
 
-        if (null !== reportDate) {
-            var today = new Date();
-            appendElement(reportDate, 'span', "(generated at " + today.toUTCString() + ")");
-        }
-
-        if (null !== table) {
-            var report = new Report(request.reportData);
-
-            report.printData(table);
-        } else {
-            console.error('Parent table with class ".report" not found');
-        }
+        // save data to session cache
+        sessionStorage.setItem('reportData', JSON.stringify(request.reportData));
     }
     if (request.hasOwnProperty('eBayPageNotFound')) {
         showError(request.eBayPageNotFound);
+    }
+});
+
+// on page refresh load data from session cache
+document.addEventListener('DOMContentLoaded', function() {
+    if ('undefined' !== typeof Storage) {
+        var reportData = sessionStorage.getItem('reportData');
+        try {
+            reportData = JSON.parse(reportData);
+            if (null !== reportData) {
+                print(reportData);
+            }
+        } catch (e) {
+            console.log(e);
+        }
     }
 });

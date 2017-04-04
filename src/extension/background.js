@@ -79,6 +79,7 @@ agent.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         }, eBayPageNotFound);
     }
 
+    // open the given URL in a new tab
     if (request.hasOwnProperty('showEbayItem')) {
         agent.tabs.create({
             active : true,
