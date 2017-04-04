@@ -370,9 +370,22 @@ function Report(params) {
 
         if (null !== footer.selector) {
             Platform(function(info, browser) {
-                var text = 'running on ' + agent.vendor + ' ' + agent.name + ' v' + agent.version + ' / '
-                        + info.os.charAt(0).toUpperCase() + info.os.slice(1) + ' ' + info.arch;
-                appendElement(footer.selector, 'span', text);
+                var text = [];
+                console.log(agent);
+                if (agent.hasOwnProperty('vendor')) {
+                    text.push(agent.vendor);
+                }
+                if (agent.hasOwnProperty('name')) {
+                    text.push(agent.name);
+                }
+                if (agent.hasOwnProperty('version')) {
+                    text.push('v' + agent.version);
+                }
+                if (text.length) {
+                    text.push('/');
+                }
+                text.push(info.os.charAt(0).toUpperCase() + info.os.slice(1) + ' ' + info.arch);
+                appendElement(footer.selector, 'span', 'running on ' + text.join(' '));
             });
         }
 
