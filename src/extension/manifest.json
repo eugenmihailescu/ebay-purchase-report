@@ -2,7 +2,7 @@
 	"manifest_version": 2,
 	"name": "eBay purchase history report",
 	"short_name": "ebay-purchase-report",
-	"version": "1.0.12",
+	"version": "1.0.13",
 	"description": "Generates a compact report of your eBay purchase history items. Can be exported also as CSV, JSON and XML file",
 	"homepage_url": "https://github.com/eugenmihailescu/ebay-purchase-report",
 	"author": "Eugen Mihailescu",
