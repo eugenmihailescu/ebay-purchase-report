@@ -33,7 +33,6 @@
 	"permissions": [
 		"activeTab",
 		"tabs",
-		"storage",
 		"*://*.ebay.com/*"
 	],
 	"web_accessible_resources": [
