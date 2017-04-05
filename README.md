@@ -12,21 +12,27 @@ Tested on Linux with Firefox 45+, Chrome 55+, Opera 36+. It should work also on 
 
 # Install the add-on
 
-1. Download the Chrome|Opera .crx add-on file or the Mozilla signed .xpi add-on file from [dist](https://github.com/eugenmihailescu/ebay-purchase-report/tree/master/dist) folder
+The `user` way:
+ * for Firefox browsers use the Mozilla's [Add to Firefox](https://addons.mozilla.org/en-US/firefox/addon/ebay-purchase-report) button.
+ * for Chrome use the Google's [ADD TO CHROME](https://chrome.google.com/webstore/detail/ebay-purchase-history-rep/ohoebnmmkndcieckfjblpdlfjpaeonbc) button.
+
+If you want to install/test a certain version then go to the [dist](https://github.com/eugenmihailescu/ebay-purchase-report/tree/master/dist) folder and download and install the version which is right for you: 
+1. Download the .zip add-on file from [dist](https://github.com/eugenmihailescu/ebay-purchase-report/tree/master/dist) folder.
 2. Open your browser Tools -> `Extension`|`Add-ons` menu
 	* On Firefox on the top-right (near the `Search add-on` input) there is a `tools` drop-down button. Click that button and choose `Install Add-on From File`. Choose the file downloaded at step (1)
-	* On Chrome|Opera just drag & drop the .crx file downloaded at (1) over the `Extension` list. It will automatically suggest you to `Drop to install` 
+	* On Chrome|Opera just drag & drop the .zip file downloaded at (1) over the `Extension` list. It will automatically suggest you to `Drop to install` 
 
-That's all!
+The `developer` way:
+ * review the source code, [build the package](#for-developers) yourself, then continue reading the `How to use it`.
 
 # How to use it
 
 1. Open the eBay page and log-in using your eBay account
 2. Go to the My eBay -> `Purchase history` menu
-3. When the page loads you will notice a golden `Quick Report` button on the Orders group box
+3. When the page loads you will notice a golden `Quick Report` button on the Orders group box:
 ![alt text](http://mynixworld.info/wp-content/uploads/2013/04/ebay-purchase-history.png "Click the Quick Report button")
-4. Click the `Quick Report` button. A new tab will open containing a compact HTML report of your eBay purchase history.
-![alt text](http://mynixworld.info/wp-content/uploads/2013/04/ebay-purchase-history-report.png "Samle report")
+4. Click the `Quick Report` button. A new tab will open containing a compact HTML report of your eBay purchase history:
+![alt text](http://mynixworld.info/wp-content/uploads/2013/04/ebay-purchase-report-2.png "Sample report")
 
 Please note that the report will include only visible items. For instance, if you chose to see only 25 `Orders per page` then the report will include only these orders. To include the whole history make sure you choose the largest `Orders per page` option available (eg. 100).
 
@@ -63,7 +69,7 @@ The report allows you to export its dataset to tab-delimited, JSON and XML forma
 
 # For Developers
 
-If you want to fork this project then you might be interested in building automatically the .crx|.xpi bundles, right? Ok, the simplest way to do this is via the [Mozilla's web-ext](https://github.com/mozilla/web-ext) command line tool or, in case of Chrome|Opera via the [Chrome's crxmake](https://developer.chrome.com/extensions/crx) command line tool.
+If you want to fork this project then you might be interested in building automatically the .zip|.crx|.xpi bundles, right? Ok, the simplest way to do this is via the [Mozilla's web-ext](https://github.com/mozilla/web-ext) command line tool or, in case of Chrome|Opera via the [Chrome's crxmake](https://developer.chrome.com/extensions/crx) command line tool.
 
 The building commands can be encapsulated within a Bourne shell script (that would normally work on Unix-like systems):
 ```bash
@@ -79,9 +85,12 @@ web-ext -s $EXT_SRC -a $EXT_DIST --api-key=<your-addons.mozilla.org-api-key> --a
 
 crxmake --pack-extension=$EXT_SRC --extension-output=$EXT_DIST/$EXT_NAME-$EXT_VER.crx --key-output=$EXT_DIST/$EXT_NAME-$EXT_VER.pem
 ```
+
 Please note that in case of Firefox you should:
 1. [generate your Mozilla API key](https://addons.mozilla.org/en-US/developers/addon/api/key/) (see `--api-key` and `--api-secret`)
 2. manually submit only-once your forked add-on to [Mozilla's Add-ons aka AMO](https://addons.mozilla.org/en-US/developers/addons), grab the newly generated add-on `UUID` and use it on the above script.
+
+Read more on [AMO](https://developer.mozilla.org/en-US/Add-ons/WebExtensions/Publishing_your_WebExtension) and/or on [Google](https://developer.chrome.com/extensions/packaging).
 
 # What's Next
 
