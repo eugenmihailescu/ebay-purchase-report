@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" type="text/css" href="options.css">
+</head>
+
+<body>
+
+	<form>
+		<fieldset>
+			<legend>Item highlighting options</legend>
+			<div>
+				<label for="enableRowHighlights">Enable row highlight</label><input type="checkbox" id="enableRowHighlights">
+			</div>
+			<div>
+				<label for="delayedShipment">Delayed shipment</label> <input type="number" min="1" max="90" id="delayedShipment"><input type="color"
+					id="delayedShipment_color">
+			</div>
+			<div>
+				<label for="notDelivered">Not delivered</label> <input type="number" min="1" max="90" id="notDelivered"><input type="color" id="notDelivered_color">
+			</div>
+			<div>
+				<label for="itemNotReceived_color">Item not received row color</label> <input type="color" id="itemNotReceived_color">
+			</div>
+			<div>
+				<label for="itemReceived_color">Item received row color</label> <input type="color" id="itemReceived_color">
+			</div>
+		</fieldset>
+
+		<fieldset>
+			<legend>Sorting &amp; Grouping options</legend>
+			<div>
+				<label for="enableGrouping">Enable grouping</label> <input type="checkbox" id="enableGrouping">
+			</div>
+			<div>
+				<label for="enableSorting">Enable sorting</label> <input type="checkbox" id="enableSorting">
+			</div>
+		</fieldset>
+		<fieldset disabled="disabled">
+			<legend>Other</legend>
+			<div>
+				<label for="enablePagination">Enable pagination</label> <input type="checkbox" id="enablePagination">
+			</div>
+			<div>
+				<label for="pageSize">Page size</label> <input type="number" id="pageSize" min="10">
+			</div>
+		</fieldset>
+		<button type="button" class="save-options">Save</button>
+		<button type="button" class="reset-options">Reset</button>
+	</form>
+
+	<script src="options.js"></script>
+
+</body>
+
+</html>

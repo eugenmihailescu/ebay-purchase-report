@@ -1,0 +1,23 @@
+@CHARSET "UTF-8";
+
+body {
+	font-family: monospace;
+	color: #555;
+	background-color: #fff;
+}
+
+fieldset div {
+	padding: 0.5em;
+}
+
+fieldset input[type="number"] {
+	height: 1em;
+}
+
+fieldset input[type="color"] {
+	margin-left: 1em;
+}
+
+fieldset label {
+	font-weight: bold;
+}
