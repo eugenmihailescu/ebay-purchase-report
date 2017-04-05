@@ -56,7 +56,7 @@ agent.runtime.onMessage.addListener(function(request, sender, sendResponse) {
             // open the report template in a new tab
             agent.tabs.create({
                 active : true,
-                url : "report.html"
+                url : "content_scripts/report.html"
             }, function(tab) {
                 newTabId = tab.id;
             });
