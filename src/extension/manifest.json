@@ -2,7 +2,7 @@
 	"manifest_version": 2,
 	"name": "eBay purchase history report",
 	"short_name": "ebay-purchase-report",
-	"version": "1.0.11",
+	"version": "1.0.12",
 	"description": "Generates a compact report of your eBay purchase history items. Can be exported also as CSV, JSON and XML file",
 	"homepage_url": "https://github.com/eugenmihailescu/ebay-purchase-report",
 	"author": "Eugen Mihailescu",
@@ -11,8 +11,8 @@
 		"url": "https://github.com/eugenmihailescu/ebay-purchase-report"
 	},
 	"icons": {
-		"48": "icons/icon-48.png",
-		"32": "icons/icon-32.png"
+		"48": "/icons/icon-48.png",
+		"32": "/icons/icon-32.png"
 	},
 	"content_scripts": [
 		{
@@ -20,26 +20,32 @@
 				"*://*.ebay.com/*"
 			],
 			"js": [
-				"script.js"
+				"content_scripts/script.js"
 			]
 		}
 	],
 	"background": {
 		"scripts": [
-			"background.js"
+			"background_scripts/background.js"
 		],
 		"persistent": false
 	},
 	"permissions": [
 		"activeTab",
 		"tabs",
+		"storage",
 		"*://*.ebay.com/*"
 	],
 	"web_accessible_resources": [
-		"report.html",
-		"report.js",
-		"report.css",
+		"content_scripts/report.html",
+		"content_scripts/report.js",
+		"content_scripts/report.css",
+		"options/options.js",
+		"options/options.css",
 		"icons/sort-asc.png",
 		"icons/sort-desc.png"
-	]
+	],
+	"options_ui": {
+		"page": "options/options.html"
+	}
 }
