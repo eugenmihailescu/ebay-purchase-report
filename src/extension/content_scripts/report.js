@@ -806,7 +806,19 @@ function get_ui_options() {
     try {
         ui_options = JSON.parse(ui_options);
     } catch (e) {
-        ui_options = {};
+        ui_options = {
+            enableRowHighlights : true,
+            enableGrouping : true,
+            enableSorting : true,
+            enablePagination : false,
+            pageSize : 100,
+            delayedShipment : 5,
+            delayedShipment_color : "#FFD0C7",
+            notDelivered : 40,
+            notDelivered_color : "#FAFAD2",
+            itemNotReceived_color : "#FF6347",
+            itemReceived_color : "#D6FDD6"
+        };
     }
 
     return ui_options;
