@@ -2,54 +2,24 @@
 var agent = "undefined" !== typeof chrome ? chrome : browser;
 
 /**
- * Create a new DOM element
- * 
- * @param {Element}
- *            parent - The parent DOM element for the new element
- * @param {string}
- *            tag - The tag element to create
- * @param {string=}
- *            text - Optional. The inner text for the new element.
- * @param {Object=}
- *            attrs - Optional. The new element attributes.
- * @returns {Element} Returns the new created element
- */
-function appendElement(parent, tag, text, attrs) {
-    if ('undefined' !== typeof tag && '' != String(tag)) {
-        var e = document.createElement(tag);
-    } else {
-        e = parent;
-    }
-
-    if ('undefined' !== typeof text && text) {
-        e.appendChild(document.createTextNode(text));
-    }
-    if ('undefined' !== typeof attrs && attrs) {
-        var i;
-        for (i in attrs) {
-            if (attrs.hasOwnProperty(i)) {
-                e.setAttribute(i, attrs[i]);
-            }
-        }
-    }
-
-    if (e !== parent) {
-        parent.appendChild(e);
-    }
-
-    return e;
-}
-
-/**
  * An asynchron helper class that provides info about the running platform
+ * 
+ * @class
+ * @author Eugen Mihailescu
+ * @since 1.0
  * 
  * @param {callback}
  *            callback - A callback to be notified when the platform information is available
  */
-function Platform(callback) {
+function PlatformInfo(callback) {
     var response = {};
     var callbacks = [];
 
+    /**
+     * Notify all registered callbacks when all platform info are ready
+     * 
+     * @since 1.0
+     */
     function notifyCallbacks() {
         if (response.hasOwnProperty('browser') && response.hasOwnProperty('info')) {
             callbacks.forEach(function(callback) {
@@ -79,12 +49,16 @@ function Platform(callback) {
 /**
  * A class that generates the HTML report
  * 
+ * @class
+ * @author Eugen Mihailescu
+ * @since 1.0
+ * 
  * @param {Object}
  *            params - The object containing the report settings and data
  * @param {Object}
  *            ui_options - The add-on UI settings
  */
-function Report(params, ui_options) {
+function ReportTemplate(params, ui_options) {
     params = params || {};
 
     // set default values when a certain param not defined
@@ -118,6 +92,7 @@ function Report(params, ui_options) {
 
     // prepare export data
     var reportExport = document.body.querySelector('.export-report');
+
     if (null !== reportExport) {
         var i, mime = {
             csv : 'text/csv',
@@ -125,7 +100,7 @@ function Report(params, ui_options) {
             xml : 'application/xml'
         };
 
-        appendElement(reportExport, 'label', 'Export as:');
+        appendElement(reportExport, 'label', 'Export as:', null, true);
 
         for (i in mime) {
             if (mime.hasOwnProperty(i)) {
@@ -142,10 +117,72 @@ function Report(params, ui_options) {
     }
 
     /**
+     * Removes all child nodes of an DOM element
+     * 
+     * @since 1.0
+     * @param {Element}
+     *            node - The parent node which children are removed
+     */
+    function removeAllChildren(node) {
+        while (node.hasChildNodes()) {
+            node.removeChild(node.lastChild);
+        }
+    }
+
+    /**
+     * Create a new DOM element
+     * 
+     * @since 1.0
+     * @param {Element}
+     *            parent - The parent DOM element for the new element
+     * @param {string}
+     *            tag - The tag element to create
+     * @param {string=}
+     *            text - Optional. The inner text for the new element.
+     * @param {Object=}
+     *            attrs - Optional. The new element attributes.
+     * @param {bool=}
+     *            cleanup - Optional. When true removes all parent's children before appending the element
+     * @returns {Element} Returns the new created element
+     */
+    function appendElement(parent, tag, text, attrs, cleanup) {
+        cleanup = cleanup || false;
+
+        if (cleanup) {
+            removeAllChildren(parent);
+        }
+
+        if ('undefined' !== typeof tag && '' != String(tag)) {
+            var e = document.createElement(tag);
+        } else {
+            e = parent;
+        }
+
+        if ('undefined' !== typeof text && text) {
+            e.appendChild(document.createTextNode(text));
+        }
+        if ('undefined' !== typeof attrs && attrs) {
+            var i;
+            for (i in attrs) {
+                if (attrs.hasOwnProperty(i)) {
+                    e.setAttribute(i, attrs[i]);
+                }
+            }
+        }
+
+        if (e !== parent) {
+            parent.appendChild(e);
+        }
+
+        return e;
+    }
+
+    /**
      * Converts the given order array to its XML string representation
      * 
+     * @since 1.0
      * @params {Array} array - An array containing the order data
-     * @returns {string}
+     * @returns {string} Returns the XML string representation of the array
      */
     function orders2Xml(array) {
         array = array || [];
@@ -219,6 +256,7 @@ function Report(params, ui_options) {
     /**
      * Get the data exported in the given format
      * 
+     * @since 1.0
      * @params {string} format - The export format (json|csv|xml)
      * @return {string} - Returns the exported data in the given format
      */
@@ -256,6 +294,7 @@ function Report(params, ui_options) {
     /**
      * Get the columns of the report
      * 
+     * @since 1.0
      * @return {Object} - Returns the columns definition
      */
     function getColumns() {
@@ -302,6 +341,7 @@ function Report(params, ui_options) {
     /**
      * Get the report column count
      * 
+     * @since 1.0
      * @return int
      */
     function getColumnsCount() {
@@ -312,6 +352,8 @@ function Report(params, ui_options) {
 
     /**
      * Add a group|header report row
+     * 
+     * @since 1.0
      */
     function addWideRow(parent, attrs) {
         var row = appendElement(parent, 'tr', null, attrs);
@@ -323,6 +365,7 @@ function Report(params, ui_options) {
     /**
      * Creates the report header
      * 
+     * @since 1.0
      * @params {Element} parent - The parent element where the header will be appended
      */
     function addHeader(parent) {
@@ -362,6 +405,8 @@ function Report(params, ui_options) {
 
     /**
      * Generates the report footer
+     * 
+     * @since 1.0
      */
     function addReportFooter() {
         var footer = {
@@ -371,7 +416,7 @@ function Report(params, ui_options) {
         };
 
         if (null !== footer.selector) {
-            Platform(function(info, browser) {
+            PlatformInfo(function(info, browser) {
                 var text = [];
                 if (agent.hasOwnProperty('vendor')) {
                     text.push(agent.vendor);
@@ -386,7 +431,8 @@ function Report(params, ui_options) {
                     text.push('/');
                 }
                 text.push(info.os.charAt(0).toUpperCase() + info.os.slice(1) + ' ' + info.arch);
-                appendElement(footer.selector, 'span', 'running on ' + text.join(' '));
+
+                appendElement(footer.selector, 'span', 'running on ' + text.join(' '), null, true);
             });
         }
 
@@ -394,19 +440,20 @@ function Report(params, ui_options) {
             if (footer.icon) {
                 appendElement(footer.icon, 'img', null, {
                     src : manifest.icons[32]
-                });
+                }, true);
             }
 
             var text = manifest.short_name + ' v' + manifest.version;
             appendElement(footer.addon, 'a', text, {
                 href : manifest.homepage_url
-            });
+            }, true);
         }
     }
 
     /**
      * Add a new group subtotal to the given DOM parent element
      * 
+     * @since 1.0
      * @param {Object}
      *            parent - The parent DOM element where to append the group footer
      * @param {string}
@@ -444,6 +491,7 @@ function Report(params, ui_options) {
     /**
      * Calculates what attributes the item should have based on its not-shipped, not-delivered,etc info
      * 
+     * @since 1.0
      * @param {Object}
      *            item - An object containing the item fields.
      * @return {Object} Return an object containing the item's CSS attributes
@@ -495,6 +543,7 @@ function Report(params, ui_options) {
     /**
      * Add a legend item with the given attributes
      * 
+     * @since 1.0
      * @param {Object}
      *            attrs - The attributes of the legend item
      */
@@ -511,6 +560,8 @@ function Report(params, ui_options) {
 
     /**
      * Add the report filters in the report header
+     * 
+     * @since 1.0
      */
     function updateFilters() {
         var reportFilter = document.body.querySelector('.report-filters');
@@ -518,6 +569,8 @@ function Report(params, ui_options) {
         if (null === reportFilter) {
             return;
         }
+
+        removeAllChildren(reportFilter);
 
         filters.forEach(function(filter, index) {
             var entry = appendElement(reportFilter, 'tr');
@@ -528,18 +581,28 @@ function Report(params, ui_options) {
 
     /**
      * Add the report title
+     * 
+     * @since 1.0
      */
     function updateTitle() {
         var reportTitle = document.body.querySelector('h2.report-title');
-        if (null === reportTitle) {
-            return;
+        var reportDate = document.querySelector('.report-date-wrapper');
+
+        if (null !== reportTitle) {
+            appendElement(reportTitle, null, manifest.name, null, true);
         }
 
-        appendElement(reportTitle, null, manifest.name);
+        if (null !== reportDate) {
+            var today = new Date();
+
+            appendElement(reportDate, 'span', "(generated at " + today.toUTCString() + ")", null, true);
+        }
     }
 
     /**
      * Update the target element thumbnail image on mouse-over
+     * 
+     * @since 1.0
      */
     function updateThumbnail(event) {
         var src = event.currentTarget.getAttribute("data-thumbnail");
@@ -553,6 +616,7 @@ function Report(params, ui_options) {
     /**
      * Adds a new row for the given fields by padding their values with spaces if not having a given minimum length.
      * 
+     * @since 1.0
      * @param {Object}
      *            parent - The parent DOM element where to append the row
      * @param {Object}
@@ -622,6 +686,7 @@ function Report(params, ui_options) {
     /**
      * Generates the HTML output for the orders items
      * 
+     * @since 1.0
      * @param {Element}
      *            parent - The parent element that encloses the HTML output
      */
@@ -647,9 +712,7 @@ function Report(params, ui_options) {
         var sortByDate = [ 'purchaseDate', 'shipStatus', 'deliveryDate' ].indexOf(sortby) >= 0;
 
         // clean-up the existent content, if any
-        while (parent.hasChildNodes()) {
-            parent.removeChild(parent.lastChild);
-        }
+        removeAllChildren(parent);
 
         updateTitle();
 
@@ -742,114 +805,127 @@ function Report(params, ui_options) {
 }
 
 /**
- * Popup a error message which fades-out at onClick or automatically after 5sec.
+ * Report page content script helper
  * 
- * @param {string}
- *            message - The message error to show
- * @returns
+ * @class
+ * @author Eugen Mihailescu
+ * @since 1.0
  */
-function showError(message) {
-    var wrapper = appendElement(document.body, 'div', null, {
-        "class" : "error-message-wrapper"
-    });
-    var inner = appendElement(wrapper, 'div', null, {
-        "class" : "error-message-inner"
-    });
-    var message = appendElement(inner, 'div', message, {
-        "class" : "error-message"
-    });
+function ReportPageScript() {
 
-    var fadeOut = function() {
-        wrapper.setAttribute("class", wrapper.getAttribute("class") + " fade-out");
-        // remove the wrapper after 0.5s (fade-out duration)
-        setTimeout(function() {
-            if (wrapper.parentNode) {
-                wrapper.parentNode.removeChild(wrapper);
-            }
-        }, 500);
-    };
+    /**
+     * Popup a error message which fades-out at onClick or automatically after 5sec.
+     * 
+     * @since 1.0
+     * @param {string}
+     *            message - The message error to show
+     */
+    function showError(message) {
+        var wrapper = appendElement(document.body, 'div', null, {
+            "class" : "error-message-wrapper"
+        });
+        var inner = appendElement(wrapper, 'div', null, {
+            "class" : "error-message-inner"
+        });
+        var message = appendElement(inner, 'div', message, {
+            "class" : "error-message"
+        });
 
-    wrapper.addEventListener("click", fadeOut);
-
-    // fade out automatically after 5s
-    setTimeout(fadeOut, 5000);
-}
-
-/**
- * Generate the report
- * 
- * @param {Object}
- *            data - The object that contains the report's data
- * @param {Object}
- *            ui_options - The add-on UI settings
- */
-function print(data, ui_options) {
-    var reportDate = document.querySelector('.report-date-wrapper');
-    var table = document.querySelector('.report');
-
-    if (null !== reportDate) {
-        var today = new Date();
-        appendElement(reportDate, 'span', "(generated at " + today.toUTCString() + ")");
-    }
-
-    if (null !== table) {
-        var report = new Report(data, ui_options);
-        report.printData(table);
-    } else {
-        console.error('Parent table with class ".report" not found');
-    }
-}
-
-function get_ui_options() {
-    var ui_options = localStorage.getItem('ui_options') || "";
-
-    try {
-        ui_options = JSON.parse(ui_options);
-    } catch (e) {
-        ui_options = {
-            enableRowHighlights : true,
-            enableGrouping : true,
-            enableSorting : true,
-            enablePagination : false,
-            pageSize : 100,
-            delayedShipment : 5,
-            delayedShipment_color : "#FFD0C7",
-            notDelivered : 40,
-            notDelivered_color : "#FAFAD2",
-            itemNotReceived_color : "#FF6347",
-            itemReceived_color : "#D6FDD6"
+        var fadeOut = function() {
+            wrapper.setAttribute("class", wrapper.getAttribute("class") + " fade-out");
+            // remove the wrapper after 0.5s (fade-out duration)
+            setTimeout(function() {
+                if (wrapper.parentNode) {
+                    wrapper.parentNode.removeChild(wrapper);
+                }
+            }, 500);
         };
+
+        wrapper.addEventListener("click", fadeOut);
+
+        // fade out automatically after 5s
+        setTimeout(fadeOut, 5000);
     }
 
-    return ui_options;
-}
-/**
- * Listen for messages received from the background script
- */
-agent.runtime.onMessage.addListener(function(request, sender, sendRespose) {
-    if (request.hasOwnProperty('reportData')) {
+    /**
+     * Generate the report
+     * 
+     * @since 1.0
+     * @param {Object}
+     *            data - The object that contains the report's data
+     * @param {Object}
+     *            ui_options - The add-on UI settings
+     */
+    function printReport(data, ui_options) {
+        var table = document.querySelector('.report');
 
-        print(request.reportData, get_ui_options());
-
-        // save data to session cache
-        sessionStorage.setItem('reportData', JSON.stringify(request.reportData));
-    }
-    if (request.hasOwnProperty('eBayPageNotFound')) {
-        showError(request.eBayPageNotFound);
-    }
-});
-
-// on page refresh load data from session cache
-document.addEventListener('DOMContentLoaded', function() {
-    if ('undefined' !== typeof Storage) {
-        var reportData = sessionStorage.getItem('reportData');
-        try {
-            reportData = JSON.parse(reportData);
-            if (null !== reportData) {
-                print(reportData, get_ui_options());
-            }
-        } catch (e) {
-            console.log(e);
+        if (null !== table) {
+            var report = new ReportTemplate(data, ui_options);
+            report.printData(table);
+        } else {
+            console.error('Parent table with class ".report" not found');
         }
     }
-});
+
+    /**
+     * Get the current add-on's UI options
+     * 
+     * @since 1.0
+     * @returns {Object} Returns an object containing the UI options
+     */
+    function get_ui_options() {
+        var ui_options = localStorage.getItem('ui_options') || "";
+
+        try {
+            ui_options = JSON.parse(ui_options);
+        } catch (e) {
+            ui_options = {
+                enableRowHighlights : true,
+                enableGrouping : true,
+                enableSorting : true,
+                enablePagination : false,
+                pageSize : 100,
+                delayedShipment : 5,
+                delayedShipment_color : "#FFD0C7",
+                notDelivered : 40,
+                notDelivered_color : "#FAFAD2",
+                itemNotReceived_color : "#FF6347",
+                itemReceived_color : "#D6FDD6"
+            };
+        }
+
+        return ui_options;
+    }
+    /**
+     * Listen for messages received from the background script
+     */
+    agent.runtime.onMessage.addListener(function(request, sender, sendRespose) {
+        if (request.hasOwnProperty('reportData')) {
+
+            printReport(request.reportData, get_ui_options());
+
+            // save data to session cache
+            sessionStorage.setItem('reportData', JSON.stringify(request.reportData));
+        }
+        if (request.hasOwnProperty('eBayPageNotFound')) {
+            showError(request.eBayPageNotFound);
+        }
+    });
+
+    // on page refresh load data from session cache
+    document.addEventListener('DOMContentLoaded', function() {
+        if ('undefined' !== typeof Storage) {
+            var reportData = sessionStorage.getItem('reportData');
+            try {
+                reportData = JSON.parse(reportData);
+                if (null !== reportData) {
+                    printReport(reportData, get_ui_options());
+                }
+            } catch (e) {
+                console.log(e);
+            }
+        }
+    });
+}
+
+ReportPageScript();
