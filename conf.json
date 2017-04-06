@@ -1,0 +1,36 @@
+{
+	"tags": {
+		"allowUnknownTags": true,
+		"dictionaries": [
+			"jsdoc",
+			"closure"
+		]
+	},
+	"source": {
+		"include": [
+			"src/extension/background_scripts",
+			"src/extension/content_scripts",
+			"src/extension/options"
+		],
+		"exclude": [],
+		"includePattern": ".+\\.js(doc|x)?$",
+		"excludePattern": "(^|\\/|\\\\)_"
+	},
+	"plugins": [
+		"plugins/markdown"
+	],
+	"opts": {
+		"destination": "jsdoc",
+		"recurse": true,
+		"readme": "README.md",
+		"tutorials": "tutorials/",
+		"template": ""
+	},
+	"templates": {
+		"cleverLinks": true,
+		"monospaceLinks": false,
+		"default": {
+			"outputSourceFiles": true
+		}
+	}
+}
