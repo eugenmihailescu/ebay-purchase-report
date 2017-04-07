@@ -418,14 +418,14 @@ function ReportTemplate(params, ui_options) {
         if (null !== footer.selector) {
             PlatformInfo(function(info, browser) {
                 var text = [];
-                if (agent.hasOwnProperty('vendor')) {
-                    text.push(agent.vendor);
+                if (browser.hasOwnProperty('vendor')) {
+                    text.push(browser.vendor);
                 }
-                if (agent.hasOwnProperty('name')) {
-                    text.push(agent.name);
+                if (browser.hasOwnProperty('name')) {
+                    text.push(browser.name);
                 }
-                if (agent.hasOwnProperty('version')) {
-                    text.push('v' + agent.version);
+                if (browser.hasOwnProperty('version')) {
+                    text.push('v' + browser.version);
                 }
                 if (text.length) {
                     text.push('/');
