@@ -100,18 +100,35 @@ function ReportTemplate(params, ui_options) {
             xml : 'application/xml'
         };
 
+        // create the downloadable blob on-demand only
+        function onExport(event) {
+            var type = event.target.getAttribute("data-type");
+            var blob = new Blob([ getExportData(type) ], {
+                type : mime[type]
+            });
+            var url = window.URL.createObjectURL(blob);
+            var today = new Date();
+            var filename = "ebay-purchase-history-" + today.getFullYear() + today.getMonth() + today.getDay() + "." + type;
+
+            agent.downloads.download({
+                url : url,
+                filename : filename,
+                saveAs : true
+            }, function() {
+                window.URL.revokeObjectURL(blob);
+            });
+        }
+
         appendElement(reportExport, 'label', 'Export as:', null, true);
 
         for (i in mime) {
             if (mime.hasOwnProperty(i)) {
-                var blob = new Blob([ getExportData(i) ], {
-                    type : mime[i]
+                var a = appendElement(reportExport, 'a', i.toUpperCase(), {
+                    "href" : "#",
+                    "class" : i,
+                    "data-type" : i
                 });
-                appendElement(reportExport, 'a', i.toUpperCase(), {
-                    "href" : URL.createObjectURL(blob),
-                    "downlod" : 'data.' + i,
-                    "class" : i
-                });
+                a.addEventListener("click", onExport);
             }
         }
     }
