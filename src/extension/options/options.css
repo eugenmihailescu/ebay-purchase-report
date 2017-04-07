@@ -21,3 +21,12 @@ fieldset input[type="color"] {
 fieldset label {
 	font-weight: bold;
 }
+
+fieldset div.visible-columns {
+	
+}
+
+.cols-1, .cols-2, .cols-3 {
+	display: inline-block;
+	vertical-align: top;
+}

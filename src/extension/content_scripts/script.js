@@ -61,6 +61,7 @@ function QuickReport(params) {
 
         var order, item;
         var data = [];
+        var today = new Date();
 
         // parse the document
         for (order in orders) {
@@ -75,6 +76,8 @@ function QuickReport(params) {
                 var purchaseDate = getInnerText(orders[order].querySelector('.order-row .purchase-header .row-date'), '');
                 var orderItems = orders[order].querySelectorAll('.item-level-wrap');
 
+                var elapsedDays = Math.round((today - Date.parse(purchaseDate)) / 86400000.0, 1);
+
                 var itemIndex = 1;
 
                 for (item in orderItems) {
@@ -83,6 +86,8 @@ function QuickReport(params) {
                         var itemSpec = getInnerText(orderItems[item].querySelector('.item-spec-r .item-title'), '');
                         var deliveryDate = getInnerText(orderItems[item].querySelector('.item-spec-r .delivery-date strong'),
                                 '');
+                        var etaDays = Math.round((Date.parse(deliveryDate.replace(/.*-\s*/g, '')) - today) / 86400000.0, 1);
+
                         var shipStatus = getAttribute(orderItems[item]
                                 .querySelector('.purchase-info-col .order-status .ph-ship'), 'title', '');
                         var feedbackNotLeft = orderItems[item]
@@ -91,6 +96,7 @@ function QuickReport(params) {
 
                         var thumbnail = getAttribute(orderItems[item].querySelector('.picCol .lazy-img'), 'src', '');
 
+                        etaDays
                         data.push({
                             orderId : orderId,
                             seller : {
@@ -99,10 +105,12 @@ function QuickReport(params) {
                             },
                             itemIndex : itemIndex,
                             purchaseDate : purchaseDate,
+                            elapsedDays : elapsedDays,
                             price : purchasePrice,
                             quantity : quantity.replace(/[\D]+/g, ''),
                             specs : itemSpec,
                             deliveryDate : deliveryDate,
+                            etaDays : etaDays,
                             shipStatus : shipStatus.replace(/.*?([\d\/]+)/g, '$1'),
                             feedbackNotLeft : null !== feedbackNotLeft,
                             thumbnail : thumbnail
@@ -143,8 +151,10 @@ function QuickReport(params) {
 
             // sort by number
             var sortByNumeric = function(a, b) {
-                var num1 = parseFloat(a[sortby].replace(/[^\d.]+/g, ''));
-                var num2 = parseFloat(b[sortby].replace(/[^\d.]+/g, ''));
+                var num1 = parseFloat(String(a[sortby]).replace(/[^\d.\-]+/g, ''));
+                var num2 = parseFloat(String(b[sortby]).replace(/[^\d.\-]+/g, ''));
+                num1 = isNaN(num1) ? 0 : num1;
+                num2 = isNaN(num2) ? 0 : num2;
 
                 return reverseorder ? num2 - num1 : num1 - num2;
             };
@@ -153,7 +163,7 @@ function QuickReport(params) {
                 return reverseorder ? a[sortby]["name"] < b[sortby]["name"] : a[sortby]["name"] > b[sortby]["name"];
             };
 
-            if ('price' == sortby) {
+            if ('price' == sortby || 'elapsedDays' == sortby || 'etaDays' == sortby) {
                 data.sort(sortByNumeric);
             } else if ('seller' == sortby) {
                 data.sort(sortBySeller);

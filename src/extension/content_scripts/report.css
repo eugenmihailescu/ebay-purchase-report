@@ -65,8 +65,8 @@ body {
 .wide td, .wide th {
 	padding-top: 1em !important;
 	padding-bottom: 1em !important;
-	background-color: #F4AE01 !important;
-	color: #000 !important;
+	background-color: #008080 !important;
+	color: #FFF !important;
 	text-align: center;
 	padding-left: 0.5em;
 	padding-right: 0.5em;
@@ -86,11 +86,12 @@ body {
 	border-right: 1px solid #ccc;
 }
 
-.report td:nth-child(1), .report td:nth-child(3), .report td:nth-child(5), .report td:nth-child(6) {
+.report td:nth-child(1), .report td:nth-child(3), .report td:nth-child(4), .report td:nth-child(6), .report td:nth-child(7),
+	.report td:nth-child(9) {
 	text-align: center;
 }
 
-.report td:nth-child(4) {
+.report td:nth-child(5) {
 	text-align: right;
 }
 

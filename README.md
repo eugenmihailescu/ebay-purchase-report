@@ -10,6 +10,18 @@ This project provides a Firefox|Chrome|Opera Web Extension (add-on) that aids in
 
 Tested on Linux with Firefox 45+, Chrome 55+, Opera 36+. It should work also on Windows or MacOS. Not built/tested on Microsoft Edge, Android or iPhone but who knows, it might just work :-)
 
+## Add-on's Permissions
+
+Some functions of this add-on uses certain APIs, thus would require certain permissions for installation. Below is a list of those permissions and the reason for them:
+ - access your data on *.ebay.com/*
+  * well this one is obvious, isn't it?
+ - download files and read and modify the browser’s download history
+  * actually we are using only the download function to make sure you can export the report data to a CSV|JSON|XML format and nonetheless to **download** it
+ - access browser tabs:
+  * since the report is loaded into a new tab accessing tabs is required. Furthermore to open the item detail's page would also require this permission too.
+
+Normally you don't bother with this when you install an add-on, don't you? In case you do now you know it :-)
+
 ## Install the add-on
 
 The `user` way:

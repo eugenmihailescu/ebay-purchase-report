@@ -331,6 +331,10 @@ function ReportTemplate(params, ui_options) {
                 label : "Purchase date",
                 sort : true
             },
+            elapsedDays : {
+                label : "Days",
+                sort : true
+            },
             price : {
                 label : "Item price",
                 sort : true
@@ -345,6 +349,10 @@ function ReportTemplate(params, ui_options) {
             },
             deliveryDate : {
                 label : "Estimated delivery",
+                sort : true
+            },
+            etaDays : {
+                label : "ETA",
                 sort : true
             },
             specs : {
@@ -406,7 +414,11 @@ function ReportTemplate(params, ui_options) {
         var i, td, attrs, html;
         for (i in cols) {
             if (cols.hasOwnProperty(i)) {
-                td = appendElement(row, 'th', cols[i].label);
+                var visibility = ui_options.visibleColumns[i] ? "" : "hidden";
+                td = appendElement(row, 'th', cols[i].label, {
+                    "class" : visibility
+                });
+                
                 if (ui_options.enableSorting && cols[i].hasOwnProperty('sort') && true === cols[i].sort) {
                     var sort_order = false === reverseorder && i == sortby ? "desc" : "asc";
                     var sortIcon = appendElement(td, 'div', null, {
@@ -677,11 +689,13 @@ function ReportTemplate(params, ui_options) {
 
         for (f in fields) {
             if (fields.hasOwnProperty(f) && cols.hasOwnProperty(f)) {
-                attr = null;
+                var visibility = ui_options.visibleColumns[f] ? "" : "hidden";
+                attr = {
+                    "class" : visibility
+                };
+
                 if (sortby == f) {
-                    attr = {
-                        "class" : "sort-column"
-                    };
+                    attr["class"] += " sort-column"
                 }
 
                 // in case of a href column
@@ -772,10 +786,12 @@ function ReportTemplate(params, ui_options) {
                 index : i + 1,
                 seller : e.seller,
                 purchaseDate : e.purchaseDate,
+                elapsedDays : e.elapsedDays,
                 price : e.price,
                 quantity : e.quantity,
                 shipStatus : e.shipStatus,
                 deliveryDate : e.deliveryDate,
+                etaDays : e.etaDays,
                 specs : e.specs,
                 received : !e.feedbackNotLeft
             };
@@ -907,7 +923,19 @@ function ReportPageScript() {
                 notDelivered : 40,
                 notDelivered_color : "#FAFAD2",
                 itemNotReceived_color : "#FF6347",
-                itemReceived_color : "#D6FDD6"
+                itemReceived_color : "#D6FDD6",
+                visibleColumns : {
+                    index : true,
+                    seller : true,
+                    purchaseDate : true,
+                    elapsedDays : true,
+                    price : true,
+                    quantity : true,
+                    shipStatus : true,
+                    deliveryDate : true,
+                    etaDays : true,
+                    specs : true
+                }
             };
         }
 
