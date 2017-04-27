@@ -69,7 +69,8 @@ function UI_OptionPage() {
                     label : "Item description",
                     visible : true
                 }
-            }
+            },
+            feedbackScore : 1000
         };
     }
 

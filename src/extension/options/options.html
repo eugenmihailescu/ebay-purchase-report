@@ -41,17 +41,22 @@
 
 		<fieldset>
 			<legend>Visible columns</legend>
-			<div class="visible-columns">
-			</div>
+			<div class="visible-columns"></div>
 		</fieldset>
 
-		<fieldset disabled="disabled">
+		<fieldset>
 			<legend>Other</legend>
+			<fieldset disabled="disabled">
+				<div>
+					<label for="enablePagination">Enable pagination</label> <input type="checkbox" id="enablePagination">
+				</div>
+				<div>
+					<label for="pageSize">Page size</label> <input type="number" id="pageSize" min="10">
+				</div>
+			</fieldset>
 			<div>
-				<label for="enablePagination">Enable pagination</label> <input type="checkbox" id="enablePagination">
-			</div>
-			<div>
-				<label for="pageSize">Page size</label> <input type="number" id="pageSize" min="10">
+				<label for="feedbackScore">Min feedback score </label> <input type="number" id="feedbackScore" min="10"><span> highlight those items when
+					seller store's feedback is less than this threshold (ie. shop from top-rated sellers)</span>
 			</div>
 		</fieldset>
 		<button type="button" class="save-options">Save</button>
