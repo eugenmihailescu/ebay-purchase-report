@@ -13,6 +13,7 @@ function QuickReport(params) {
     params = params || {};
 
     var sortby = params.sortBy || '';
+    var customFilter = params.customFilter || '';
     var reverseorder = params.reverseorder || false;
 
     /**
@@ -178,6 +179,33 @@ function QuickReport(params) {
     }
 
     /**
+     * Apply the custom filter to the data array
+     * 
+     * @since 1.0
+     * @param {Array}
+     *            data - The array to sort
+     * @return {Array} Returns the sorted array
+     */
+    function applyCustomFilter(data) {
+        var result = [];
+        if (null !== customFilter && customFilter.length) {
+            var i;
+            for (i = 0; i < data.length; i += 1) {
+                switch (customFilter) {
+                case "notShipped":
+                    if (isNaN(Date.parse(data[i].shipStatus)))
+                        result.push(data[i]);
+                    break;
+                }
+            }
+        } else {
+            result = data;
+        }
+
+        return result;
+    }
+
+    /**
      * Query the eBay purchase history filters from the current page
      * 
      * @since 1.0
@@ -222,6 +250,7 @@ function QuickReport(params) {
         var data = prepare();
         if (false !== data) {
             data = sort(data);
+            data = applyCustomFilter(data);
         }
 
         return {
@@ -238,7 +267,7 @@ function QuickReport(params) {
  * @author Eugen Mihailescu
  * @since 1.0
  */
-function EBayPageScript() {
+function EbayPurchaseHistory() {
     /**
      * Get the report data and push it to the background script
      * 
@@ -249,6 +278,7 @@ function EBayPageScript() {
     function onButtonClick(params) {
         params = params || {
             sortby : "",
+            customFilter : "",
             reverseorder : false
         };
 
@@ -263,6 +293,7 @@ function EBayPageScript() {
                 orders : data.orders,
                 filters : data.filters,
                 sortby : params.sortBy,
+                customFilter : params.customFilter,
                 reverseorder : params.reverseorder,
                 tabId : params.hasOwnProperty('tabId') ? params.tabId : null
             }
@@ -359,7 +390,7 @@ function EBayPageScript() {
      * Listen for messages from the background script
      */
     agent.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-        if (request.hasOwnProperty('sortBy')) {
+        if (request.hasOwnProperty('sortBy') || request.hasOwnProperty('customFilter')) {
             onButtonClick(request);
         }
 
@@ -369,4 +400,67 @@ function EBayPageScript() {
     });
 }
 
-EBayPageScript();
+/**
+ * Content script helper class for the eBay item detail page
+ * 
+ * @class
+ * @author Eugen Mihailescu
+ * @since 1.0.17
+ */
+function EbayItemPage() {
+    /**
+     * Get the current add-on's UI options
+     * 
+     * @since 1.0
+     * @param {String}
+     *            options - The session stored options
+     * @returns {Object} Returns an object containing the UI options
+     */
+    function get_ui_options(options) {
+        var result = {};
+
+        try {
+            result = JSON.parse(options);
+        } catch (e) {
+            result = {
+                feedbackScore : 1000
+            };
+        }
+
+        return result;
+    }
+
+    var promise = agent.runtime.sendMessage({
+        getUIOptions : true,
+    });
+
+    promise.then(function(response) {
+        // inject the Report button into the eBay purchase history page
+        var scoreDiv = document.querySelector('#CenterPanel #CenterPanelInternal #RightSummaryPanel .si-content div');
+
+        if (null !== scoreDiv) {
+
+            var scoreElement = scoreDiv.querySelector('span.mbg-l a');
+            if (null !== scoreElement) {
+                var scoreValue = parseInt(scoreElement.innerText);
+                var ui_options = get_ui_options(response.ui_options);
+
+                if (scoreValue < ui_options.feedbackScore) {
+                    var defaultBgColor = scoreDiv.style.backgroundColor;
+                    setInterval(function() {
+                        if (scoreDiv.style.backgroundColor == defaultBgColor) {
+                            scoreDiv.style.backgroundColor = "#FF0000";
+                            scoreDiv.style.transition = "background-color 0.3s ease";
+                        } else {
+                            scoreDiv.style.backgroundColor = defaultBgColor;
+                        }
+                    }, 1000);
+                }
+            }
+        }
+    });
+}
+
+EbayPurchaseHistory();
+
+EbayItemPage();
