@@ -63,6 +63,7 @@ function ReportTemplate(params, ui_options) {
 
     // set default values when a certain param not defined
     var sortby = params.sortby || "";
+    var customFilter = params.customFilter || "";
     var reverseorder = params.reverseorder || false;
     var orders = params.orders || [];
     var filters = params.filters || [];
@@ -129,6 +130,43 @@ function ReportTemplate(params, ui_options) {
                     "data-type" : i
                 });
                 a.addEventListener("click", onExport);
+            }
+        }
+    }
+
+    // prepare custom filters
+    var customFilters = document.body.querySelector('.custom-filters');
+    if (null !== customFilters) {
+        var i, filter_options = {
+            "" : "All",
+            "notShipped" : 'Not yet shipped'
+        };
+
+        appendElement(customFilters, 'label', 'Show only:', null, true);
+
+        function onFilter(event) {
+            var filter = event.target.value;
+
+            agent.tabs.getCurrent(function(tab) {
+                agent.runtime.sendMessage({
+                    tabId : tab.id,
+                    customFilter : filter
+                });
+            });
+        }
+
+        var filterElement = appendElement(customFilters, 'select');
+        filterElement.addEventListener("change", onFilter);
+
+        for (i in filter_options) {
+            if (filter_options.hasOwnProperty(i)) {
+                var attrs = {
+                    "value" : i
+                };
+                if (customFilter == i) {
+                    attrs["selected"] = "selected";
+                }
+                appendElement(filterElement, 'option', filter_options[i], attrs);
             }
         }
     }
@@ -418,7 +456,7 @@ function ReportTemplate(params, ui_options) {
                 td = appendElement(row, 'th', cols[i].label, {
                     "class" : visibility
                 });
-                
+
                 if (ui_options.enableSorting && cols[i].hasOwnProperty('sort') && true === cols[i].sort) {
                     var sort_order = false === reverseorder && i == sortby ? "desc" : "asc";
                     var sortIcon = appendElement(td, 'div', null, {
@@ -908,11 +946,10 @@ function ReportPageScript() {
      */
     function get_ui_options() {
         var ui_options = localStorage.getItem('ui_options') || "";
-
         try {
-            ui_options = JSON.parse(ui_options);
+            result = JSON.parse(ui_options);
         } catch (e) {
-            ui_options = {
+            result = {
                 enableRowHighlights : true,
                 enableGrouping : true,
                 enableSorting : true,
@@ -939,7 +976,7 @@ function ReportPageScript() {
             };
         }
 
-        return ui_options;
+        return result;
     }
     /**
      * Listen for messages received from the background script

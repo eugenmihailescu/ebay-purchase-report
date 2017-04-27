@@ -206,6 +206,10 @@ body {
 	
 }
 
+.custom-filters {
+	text-align: right;
+}
+
 .export-report .csv, .export-report .json, .export-report .xml {
 	margin-left: 0.5em;
 }
