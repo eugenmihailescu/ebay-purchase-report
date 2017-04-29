@@ -816,7 +816,7 @@ function ReportTemplate(params, ui_options) {
             }
 
             currency = c;
-            v = parseFloat(e.price.replace(/.*?([\d\.]+).*/g, '$1').replace(',',''));
+            v = parseFloat(e.price.replace(/.*?([\d\.,]+).*/g, '$1').replace(',',''));
             t += v;
             gt += v;
 
