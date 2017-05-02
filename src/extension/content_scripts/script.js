@@ -249,8 +249,8 @@ function QuickReport(params) {
     this.get_data = function() {
         var data = prepare();
         if (false !== data) {
-            data = sort(data);
             data = applyCustomFilter(data);
+            data = sort(data);
         }
 
         return {

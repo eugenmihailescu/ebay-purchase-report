@@ -150,7 +150,9 @@ function ReportTemplate(params, ui_options) {
             agent.tabs.getCurrent(function(tab) {
                 agent.runtime.sendMessage({
                     tabId : tab.id,
-                    customFilter : filter
+                    customFilter : filter,
+                    sortby : sortby,
+                    reverseorder : reverseorder
                 });
             });
         }
@@ -438,7 +440,8 @@ function ReportTemplate(params, ui_options) {
                 agent.runtime.sendMessage({
                     tabId : tab.id,
                     sortBy : name,
-                    reverseorder : !reverseorder
+                    reverseorder : !reverseorder,
+                    customFilter : customFilter
                 });
             });
         };
@@ -816,7 +819,7 @@ function ReportTemplate(params, ui_options) {
             }
 
             currency = c;
-            v = parseFloat(e.price.replace(/.*?([\d\.,]+).*/g, '$1').replace(',',''));
+            v = parseFloat(e.price.replace(/.*?([\d\.,]+).*/g, '$1').replace(',', ''));
             t += v;
             gt += v;
 
