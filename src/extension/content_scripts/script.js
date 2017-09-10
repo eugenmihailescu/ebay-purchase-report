@@ -430,11 +430,7 @@ function EbayItemPage() {
         return result;
     }
 
-    var promise = agent.runtime.sendMessage({
-        getUIOptions : true,
-    });
-
-    promise.then(function(response) {
+    var responseCallback = function(response) {
         // inject the Report button into the eBay purchase history page
         var scoreDiv = document.querySelector('#CenterPanel #CenterPanelInternal #RightSummaryPanel .si-content div');
 
@@ -458,7 +454,16 @@ function EbayItemPage() {
                 }
             }
         }
-    });
+    };
+
+    var promise = agent.runtime.sendMessage({
+        getUIOptions : true,
+    }, responseCallback);
+
+    // on non-Chrome browsers use the promise
+    if ("undefined" === typeof chrome) {
+        promise.then(responseCallback);
+    }
 }
 
 EbayPurchaseHistory();
