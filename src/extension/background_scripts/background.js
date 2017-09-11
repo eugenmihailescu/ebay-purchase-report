@@ -10,6 +10,8 @@ var agent = "undefined" !== typeof chrome ? chrome : browser;
  * @since 1.0
  */
 function BackgroundScript() {
+    var manifest = agent.runtime.getManifest();
+
     /**
      * Get the current UI options
      * 
@@ -32,10 +34,17 @@ function BackgroundScript() {
         resolve = resolve || false;
         reject = reject || false;
 
+        var matches = [ "*://*.ebay.com/*", "*://*.ebay.com.au/*", "*://*.ebay.co.uk/*", "*://*.ebay.com.my/*" ];
+
+        if ("undefined" !== typeof manifest.content_scripts && "undefined" !== typeof manifest.content_scripts.matches) {
+            matches = manifest.content_scripts.matches;
+        }
+
         agent.tabs.query({
             active : false,
             status : "complete",
-            url : "*://*.ebay.com/*"
+            url : matches
+
         }, resolve);
 
     }

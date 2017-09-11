@@ -68,9 +68,15 @@ function UI_OptionPage() {
                 specs : {
                     label : "Item description",
                     visible : true
+                },
+                trackingNo : {
+                    label : "TrackingNo",
+                    visible : false
+                // @since 1.0.21
                 }
             },
-            feedbackScore : 1000
+            feedbackScore : 1000,
+            csvSeparator : "tab"// @since 1.0.21
         };
     }
 

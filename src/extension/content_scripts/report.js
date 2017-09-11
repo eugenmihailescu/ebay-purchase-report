@@ -174,6 +174,24 @@ function ReportTemplate(params, ui_options) {
     }
 
     /**
+     * Parses the given string as date
+     * 
+     * @since 1.0.21
+     * @param {String}
+     *            string - The string to parse
+     * @return {Object} - Returns the Date object on success, NaN otherwise
+     */
+    function dateParse(string) {
+        var result = Date.parse(string);
+        var today = new Date();
+        if (isNaN(result) || Math.abs((today - result) / 86400000.0) > 365) {
+            string += " " + today.getFullYear();
+            result = Date.parse(string);
+        }
+        return result;
+    }
+
+    /**
      * Removes all child nodes of an DOM element
      * 
      * @since 1.0
@@ -244,6 +262,9 @@ function ReportTemplate(params, ui_options) {
     function orders2Xml(array) {
         array = array || [];
 
+        /**
+         * @see https://www.dvteclipse.com/documentation/svlinter/How_to_use_special_characters_in_XML.3F.html
+         */
         var xmlEscape = function(string) {
             string = String(string);
 
@@ -252,12 +273,13 @@ function ReportTemplate(params, ui_options) {
                 apos : "'",
                 lt : '<',
                 gt : '>',
-                amp : '&'
+                amp : '&',
+                '#61' : '='
             }, i;
 
             for (i in escapeChars) {
                 if (escapeChars.hasOwnProperty(i)) {
-                    string = string.replace(escapeChars[i], '&' + i + ';');
+                    string = string.replace(new RegExp(escapeChars[i], "g"), '&' + i + ';');
                 }
             }
 
@@ -285,12 +307,13 @@ function ReportTemplate(params, ui_options) {
 
         var rows = [], lastOrderId = null;
         array.forEach(function(order, index) {
-            var orderCols = [ 'orderId', 'purchaseDate', 'seller' ];
+            var orderCols = [ 'orderId', 'purchaseDate', 'seller', 'trackingNo' ];
             // close `order` tag on orderId change
             if (lastOrderId !== order.orderId) {
                 rows.push((null !== lastOrderId ? '</items></order>' : '') + '<order id="' + xmlEscape(order.orderId)
                         + '" purchaseDate="' + xmlEscape(order.purchaseDate) + '" seller="' + xmlEscape(order.seller.name)
-                        + '" sellerUrl="' + xmlEscape(order.seller.url) + '"><items>');
+                        + '" sellerUrl="' + xmlEscape(order.seller.url) + '" trackingNo="' + xmlEscape(order.trackingNo.name)
+                        + '" trackingUrl="' + xmlEscape(order.trackingNo.url) + '"><items>');
                 lastOrderId = order.orderId;
             }
 
@@ -300,6 +323,7 @@ function ReportTemplate(params, ui_options) {
                     attrs.push(i + '="' + xmlEscape(order[i]) + '"');
                 }
             }
+            attrs.push
             rows.push('<item ' + attrs.join(' ') + '></item>');
         });
 
@@ -311,6 +335,57 @@ function ReportTemplate(params, ui_options) {
     }
 
     /**
+     * Converts the given order array to its CSV string representation
+     * 
+     * @since 1.0.21
+     * @params {Array} array - An array containing the order data
+     * @returns {string} Returns the CSV string representation of the array
+     */
+    function orders2Csv(orders) {
+        var result = '';
+        var csvSeparator;
+
+        switch (ui_options.csvSeparator) {
+        case "comma":
+            csvSeparator = ",";
+            break;
+        case "semicolon":
+            csvSeparator = ";";
+            break;
+        default:
+            csvSeparator = "\t";
+            break;
+        }
+
+        orders.forEach(function(order, index) {
+            // file header
+            if ('' == result) {
+                result += Object.keys(order).join(csvSeparator) + "\n";
+            }
+
+            // file content
+            var line = [], i, s;
+            for (i in order) {
+                if (order.hasOwnProperty(i)) {
+                    switch (i) {
+                    case 'seller':
+                    case 'trackingNo':
+                        s = order[i]["name"];
+                        break;
+                    default:
+                        s = order[i];
+                        break;
+                    }
+                    line.push(s);
+                }
+            }
+            result += line.join(csvSeparator) + "\n";
+        });
+
+        return result;
+    }
+
+    /**
      * Get the data exported in the given format
      * 
      * @since 1.0
@@ -319,6 +394,7 @@ function ReportTemplate(params, ui_options) {
      */
     function getExportData(format) {
         var result = '';
+
         switch (format) {
         case 'json':
             result = JSON.stringify(orders);
@@ -327,21 +403,7 @@ function ReportTemplate(params, ui_options) {
             result = orders2Xml(orders);
             break;
         case 'csv':
-            orders.forEach(function(order, index) {
-                // file header
-                if ('' == result) {
-                    result += Object.keys(order).join("\t") + "\n";
-                }
-
-                // file content
-                var line = [], i;
-                for (i in order) {
-                    if (order.hasOwnProperty(i)) {
-                        line.push('seller' == i ? order[i]["name"] : order[i]);
-                    }
-                }
-                result += line.join("\t") + "\n";
-            });
+            result = orders2Csv(orders);
             break;
         }
 
@@ -397,6 +459,13 @@ function ReportTemplate(params, ui_options) {
             },
             specs : {
                 label : "Item description",
+            },
+            trackingNo : {
+                href : {
+                    url : "url",
+                    text : "name"
+                },
+                label : "TrackingNo"
             }
         };
 
@@ -571,16 +640,16 @@ function ReportTemplate(params, ui_options) {
             var diff = date1 - date2;// in microseconds
             return diff / 86400000;
         };
-        var purchaseDate = Date.parse(item.purchaseDate);
+        var purchaseDate = dateParse(item.purchaseDate);
         var result = false;
 
-        if (ui_options.enableRowHighlights && NaN !== purchaseDate) {
+        if (ui_options.enableRowHighlights && !isNaN(purchaseDate)) {
             var daysFromPurchase = dateDiff(Date.now(), purchaseDate);
 
-            var shippingDate = Date.parse(item.shipStatus);
-            var shippedAfterDays = NaN === shippingDate ? daysFromPurchase : dateDiff(shippingDate - purchaseDate);
-            var deliveryDate = Date.parse(item.deliveryDate.replace(/.*-\s*/g, ''));
-            deliveryDate = NaN === deliveryDate ? Date.now() : deliveryDate;
+            var shippingDate = dateParse(item.shipStatus);
+            var shippedAfterDays = isNaN(shippingDate) ? daysFromPurchase : dateDiff(shippingDate - purchaseDate);
+            var deliveryDate = dateParse(item.deliveryDate.replace(/.*-\s*/g, ''));
+            deliveryDate = isNaN(deliveryDate) ? Date.now() : deliveryDate;
 
             if (!item.received) {
                 // item not delivered after 40 days
@@ -596,7 +665,7 @@ function ReportTemplate(params, ui_options) {
                 }
 
                 // item not received on due date
-                if (NaN !== deliveryDate && dateDiff(Date.now(), deliveryDate) > 0) {
+                if (!isNaN(deliveryDate) && dateDiff(Date.now(), deliveryDate) > 0) {
                     result = highlight.itemNotReceived;
                     result.style = "background-color:" + ui_options.itemNotReceived_color;
                 }
@@ -834,7 +903,8 @@ function ReportTemplate(params, ui_options) {
                 deliveryDate : e.deliveryDate,
                 etaDays : e.etaDays,
                 specs : e.specs,
-                received : !e.feedbackNotLeft
+                received : !e.feedbackNotLeft,
+                trackingNo : e.trackingNo
             };
 
             // print the item's row

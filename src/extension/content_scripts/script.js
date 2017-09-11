@@ -17,6 +17,45 @@ function QuickReport(params) {
     var reverseorder = params.reverseorder || false;
 
     /**
+     * Calculates the date difference between the specified date and "now"
+     * 
+     * @since 1.0.21
+     * @param {Object}
+     *            date - The Date object to compare
+     * @param {int=}
+     *            [sign] - When 1 then the Date is expected to be older than today, otherwise newer. Default 1.
+     * @return {int} - Returns the number of days between the Date and today
+     */
+    function dateDiff(date, sign) {
+        if ("undefined" === typeof sign) {
+            sign = 1;
+        } else if (1 != sign) {
+            sign = -1;
+        }
+
+        var today = new Date();
+        return Math.round(sign * (today - date) / 86400000.0, 1);
+    }
+
+    /**
+     * Parses the given string as date
+     * 
+     * @since 1.0.21
+     * @param {String}
+     *            string - The string to parse
+     * @return {Object} - Returns the Date object on success, NaN otherwise
+     */
+    function dateParse(string) {
+        var result = Date.parse(string);
+        var today = new Date();
+        if (isNaN(result) || Math.abs((today - result) / 86400000.0) > 365) {
+            string += " " + today.getFullYear();
+            result = Date.parse(string);
+        }
+        return result;
+    }
+
+    /**
      * Get the inner text of a HTML element
      * 
      * @since 1.0
@@ -47,6 +86,29 @@ function QuickReport(params) {
     }
 
     /**
+     * Get the dataset value of a HTML element
+     * 
+     * @since 1.0.21
+     * @param {Object}
+     *            element - The DOM element
+     * @param {string}
+     *            name - The dataset key name
+     * @param {String}
+     *            value - The default value if element is NULL
+     * @return {String}
+     */
+    function getDataset(element, name, value) {
+        if (!element || "undefined" === typeof element.dataset || "undefined" === typeof element.dataset[name]) {
+            if ("undefined" === typeof value) {
+                value = null;
+            }
+            return value;
+        }
+
+        return element.dataset[name];
+    }
+
+    /**
      * Gather the eBay order information
      * 
      * @since 1.0
@@ -62,7 +124,6 @@ function QuickReport(params) {
 
         var order, item;
         var data = [];
-        var today = new Date();
 
         // parse the document
         for (order in orders) {
@@ -77,7 +138,7 @@ function QuickReport(params) {
                 var purchaseDate = getInnerText(orders[order].querySelector('.order-row .purchase-header .row-date'), '');
                 var orderItems = orders[order].querySelectorAll('.item-level-wrap');
 
-                var elapsedDays = Math.round((today - Date.parse(purchaseDate)) / 86400000.0, 1);
+                var elapsedDays = dateDiff(dateParse(purchaseDate));
 
                 var itemIndex = 1;
 
@@ -87,7 +148,13 @@ function QuickReport(params) {
                         var itemSpec = getInnerText(orderItems[item].querySelector('.item-spec-r .item-title'), '');
                         var deliveryDate = getInnerText(orderItems[item].querySelector('.item-spec-r .delivery-date strong'),
                                 '');
-                        var etaDays = Math.round((Date.parse(deliveryDate.replace(/.*-\s*/g, '')) - today) / 86400000.0, 1);
+
+                        var trackingEl = orderItems[item].querySelector('.item-spec-r .tracking-label a');
+                        var trackingNo = getInnerText(trackingEl, '').replace(getAttribute(trackingEl, 'title', ''), '')
+                                .replace(/[^\S]*/g, '');
+                        var trackingNoUrl = getDataset(trackingEl, 'url', '');
+
+                        var etaDays = dateDiff(dateParse(deliveryDate.replace(/.*-\s*/g, '')), -1);
 
                         var shipStatus = getAttribute(orderItems[item]
                                 .querySelector('.purchase-info-col .order-status .ph-ship'), 'title', '');
@@ -97,7 +164,6 @@ function QuickReport(params) {
 
                         var thumbnail = getAttribute(orderItems[item].querySelector('.picCol .lazy-img'), 'src', '');
 
-                        etaDays
                         data.push({
                             orderId : orderId,
                             seller : {
@@ -114,7 +180,11 @@ function QuickReport(params) {
                             etaDays : etaDays,
                             shipStatus : shipStatus.replace(/.*?([\d\/]+)/g, '$1'),
                             feedbackNotLeft : null !== feedbackNotLeft,
-                            thumbnail : thumbnail
+                            thumbnail : thumbnail,
+                            trackingNo : {
+                                name : trackingNo,
+                                url : trackingNoUrl
+                            }
                         });
 
                         itemIndex += 1;
@@ -144,8 +214,8 @@ function QuickReport(params) {
 
             // sort by date field
             var sortByDate = function(a, b) {
-                var date1 = Date.parse(a[sortby].replace(/.*-\s*/g, ''));
-                var date2 = Date.parse(b[sortby].replace(/.*-\s*/g, ''));
+                var date1 = dateParse(a[sortby].replace(/.*-\s*/g, ''));
+                var date2 = dateParse(b[sortby].replace(/.*-\s*/g, ''));
 
                 return reverseorder ? date2 - date1 : date1 - date2;
             };
@@ -193,7 +263,7 @@ function QuickReport(params) {
             for (i = 0; i < data.length; i += 1) {
                 switch (customFilter) {
                 case "notShipped":
-                    if (isNaN(Date.parse(data[i].shipStatus)))
+                    if (isNaN(dateParse(data[i].shipStatus)))
                         result.push(data[i]);
                     break;
                 }
@@ -423,7 +493,8 @@ function EbayItemPage() {
             result = JSON.parse(options);
         } catch (e) {
             result = {
-                feedbackScore : 1000
+                feedbackScore : 1000,
+                csvSeparator : "tab"
             };
         }
 
