@@ -34,7 +34,13 @@ function BackgroundScript() {
         resolve = resolve || false;
         reject = reject || false;
 
-        var matches = [ "*://*.ebay.com/*", "*://*.ebay.com.au/*", "*://*.ebay.co.uk/*", "*://*.ebay.com.my/*" ];
+        var matches = [ "*://*.ebay.com/*", "*://*.ebay.com.au/*", "*://*.ebay.co.uk/*", "*://*.ebay.com.my/*",
+                "*://*.ebay.ca/*", "*://*.ebay.com.ar/*", "*://*.ebay.at/*", "*://*.ebay.be/*", "*://*.ebay.com.br/*",
+                "*://*.ebay.com.cn/*", "*://*.ebay.cz/*", "*://*.ebay.dk/*", "*://*.ebay.fi/*", "*://*.ebay.fr/*",
+                "*://*.ebay.de/*", "*://*.ebay.gr/*", "*://*.ebay.com.hk/*", "*://*.ebay.hu/*", "*://*.ebay.in/*",
+                "*://*.ebay.ie/*", "*://*.ebay.it/*", "*://*.ebay.nl/*", "*://*.ebay.no/*", "*://*.ebay.ph/*",
+                "*://*.ebay.pl/*", "*://*.ebay.pt/*", "*://*.ebay.ru/*", "*://*.ebay.com.sg/*", "*://*.ebay.es/*",
+                "*://*.ebay.ch/*", "*://*.ebay.co.th/*", "*://*.ebay.vn/*" ];
 
         if ("undefined" !== typeof manifest.content_scripts && "undefined" !== typeof manifest.content_scripts.matches) {
             matches = manifest.content_scripts.matches;
