@@ -135,7 +135,7 @@ function QuickReport(params) {
 
                 var sellerName = getInnerText(orders[order].querySelector('.order-item-count .seller-id'), '');
                 var sellerUrl = getAttribute(orders[order].querySelector('.order-item-count .seller-id'), 'href', '');
-                var purchaseDate = getInnerText(orders[order].querySelector('.order-row .purchase-header .row-date'), '');
+                var purchaseDate = getInnerText(orders[order].querySelector('.order-row .purchase-header .row-value'), '');
                 var orderItems = orders[order].querySelectorAll('.item-level-wrap');
 
                 var elapsedDays = dateDiff(dateParse(purchaseDate));
